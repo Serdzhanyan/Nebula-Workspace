@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Zap, ArrowRight, Mail, Bell, CheckSquare, MoreHorizontal, Play, Pause, Trash2, Settings, UserPlus, DollarSign, Users, Target, Send, Filter, Layers, Megaphone, BarChart2, MousePointer, Eye, TrendingUp, X, Smartphone, Share2, MessageSquare, Check, Save } from 'lucide-react';
+import { Plus, Zap, ArrowRight, Mail, Bell, CheckSquare, MoreHorizontal, Play, Pause, Trash2, Settings, UserPlus, DollarSign, Users, Target, Send, Filter, Layers, Megaphone, BarChart2, MousePointer, Eye, TrendingUp, X, Smartphone, Share2, MessageSquare, Check, Save, Edit2, Copy, FileText, Loader2, Globe } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface Workflow {
@@ -35,14 +35,35 @@ interface Campaign {
 
 export const AutomationPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'workflows' | 'segments' | 'marketing'>('workflows');
+  const [activeWorkflowMenu, setActiveWorkflowMenu] = useState<string | null>(null);
+  const [activeSegmentMenu, setActiveSegmentMenu] = useState<string | null>(null);
   
   // State for Create Campaign Modal
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
     name: '',
-    channel: 'Email' as 'Email' | 'SMS' | 'Social',
+    channel: 'Email' as 'Email' | 'SMS' | 'Social' | 'Ad',
     segment: '',
     content: ''
+  });
+
+  // State for Campaign Detail Modal
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+
+  // State for Create Workflow Modal
+  const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
+  const [newWorkflow, setNewWorkflow] = useState({
+    name: '',
+    trigger: 'New Lead Created',
+    action: 'Send Email Sequence'
+  });
+
+  // State for Create Segment Modal
+  const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false);
+  const [newSegment, setNewSegment] = useState({
+    name: '',
+    criteria: '',
+    tags: ''
   });
 
   const [workflows, setWorkflows] = useState<Workflow[]>([
@@ -81,6 +102,20 @@ export const AutomationPage: React.FC = () => {
     setWorkflows(prev => prev.map(w => w.id === id ? { ...w, status: w.status === 'active' ? 'paused' : 'active' } : w));
   };
 
+  const deleteWorkflow = (id: string) => {
+      if (window.confirm("Are you sure you want to delete this workflow?")) {
+          setWorkflows(prev => prev.filter(w => w.id !== id));
+      }
+      setActiveWorkflowMenu(null);
+  };
+
+  const deleteSegment = (id: string) => {
+      if (window.confirm("Are you sure you want to delete this segment?")) {
+          setSegments(prev => prev.filter(s => s.id !== id));
+      }
+      setActiveSegmentMenu(null);
+  };
+
   const launchCampaign = (segmentName: string) => {
       // Pre-fill modal
       setNewCampaign({ ...newCampaign, segment: segmentName });
@@ -103,6 +138,36 @@ export const AutomationPage: React.FC = () => {
       setCampaigns([campaign, ...campaigns]);
       setIsCampaignModalOpen(false);
       setNewCampaign({ name: '', channel: 'Email', segment: '', content: '' });
+  };
+
+  const handleCreateWorkflow = (e: React.FormEvent) => {
+      e.preventDefault();
+      const workflow: Workflow = {
+          id: `w-${Date.now()}`,
+          name: newWorkflow.name,
+          trigger: newWorkflow.trigger,
+          action: newWorkflow.action,
+          status: 'active',
+          runs: 0
+      };
+      setWorkflows([workflow, ...workflows]);
+      setIsWorkflowModalOpen(false);
+      setNewWorkflow({ name: '', trigger: 'New Lead Created', action: 'Send Email Sequence' });
+  };
+
+  const handleCreateSegment = (e: React.FormEvent) => {
+      e.preventDefault();
+      const segment: Segment = {
+          id: `s-${Date.now()}`,
+          name: newSegment.name,
+          criteria: newSegment.criteria,
+          count: 0,
+          lastUpdated: 'Just now',
+          tags: newSegment.tags.split(',').map(t => t.trim()).filter(t => t)
+      };
+      setSegments([segment, ...segments]);
+      setIsSegmentModalOpen(false);
+      setNewSegment({ name: '', criteria: '', tags: '' });
   };
 
   const insertToken = (token: string) => {
@@ -128,16 +193,281 @@ export const AutomationPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
       switch(status) {
-          case 'Active': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
-          case 'Completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-          case 'Scheduled': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-          default: return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
+          case 'Active': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+          case 'Completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+          case 'Scheduled': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+          default: return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-600';
+      }
+  };
+
+  const getTypeIcon = (type: string) => {
+      switch(type) {
+          case 'Email': return <Mail size={16} />;
+          case 'SMS': return <Smartphone size={16} />;
+          case 'Social': return <Share2 size={16} />;
+          case 'Ad': return <Globe size={16} />;
+          default: return <Megaphone size={16} />;
       }
   };
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       
+      {/* Create Workflow Modal */}
+      {isWorkflowModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsWorkflowModalOpen(false)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" 
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
+                        Create Automation Workflow
+                    </h3>
+                    <button onClick={() => setIsWorkflowModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleCreateWorkflow} className="p-6 space-y-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Workflow Name</label>
+                            <input 
+                                type="text" 
+                                placeholder="e.g. VIP Onboarding"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                                value={newWorkflow.name}
+                                onChange={e => setNewWorkflow({...newWorkflow, name: e.target.value})}
+                                required
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Trigger</label>
+                            <div className="relative">
+                                <Zap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <select 
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white appearance-none cursor-pointer"
+                                    value={newWorkflow.trigger}
+                                    onChange={e => setNewWorkflow({...newWorkflow, trigger: e.target.value})}
+                                >
+                                    <option>New Lead Created</option>
+                                    <option>Deal Value {'>'} $10k</option>
+                                    <option>Stage unchanged 7 days</option>
+                                    <option>Contract Signed</option>
+                                    <option>Deal Lost</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Action</label>
+                            <div className="relative">
+                                <Settings size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <select 
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white appearance-none cursor-pointer"
+                                    value={newWorkflow.action}
+                                    onChange={e => setNewWorkflow({...newWorkflow, action: e.target.value})}
+                                >
+                                    <option>Send Email Sequence</option>
+                                    <option>Notify Manager</option>
+                                    <option>Create Task</option>
+                                    <option>Create Onboarding Project</option>
+                                    <option>Update Field</option>
+                                    <option>Send Email</option>
+                                    <option>Send Notification</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <button 
+                            type="button" 
+                            onClick={() => setIsWorkflowModalOpen(false)}
+                            className="flex-1 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-200/50 dark:shadow-none"
+                        >
+                            <Plus size={16} /> Create Workflow
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Create Segment Modal */}
+      {isSegmentModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsSegmentModalOpen(false)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" 
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Users size={20} className="text-indigo-600 dark:text-indigo-400" />
+                        Create New Segment
+                    </h3>
+                    <button onClick={() => setIsSegmentModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleCreateSegment} className="p-6 space-y-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Segment Name</label>
+                            <input 
+                                type="text" 
+                                placeholder="e.g. Loyal Customers"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                                value={newSegment.name}
+                                onChange={e => setNewSegment({...newSegment, name: e.target.value})}
+                                required
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Filtering Criteria</label>
+                            <input 
+                                type="text" 
+                                placeholder="e.g. Total Spend > $500"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                                value={newSegment.criteria}
+                                onChange={e => setNewSegment({...newSegment, criteria: e.target.value})}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Tags (comma separated)</label>
+                            <input 
+                                type="text" 
+                                placeholder="e.g. Sales, Marketing, VIP"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                                value={newSegment.tags}
+                                onChange={e => setNewSegment({...newSegment, tags: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <button 
+                            type="button" 
+                            onClick={() => setIsSegmentModalOpen(false)}
+                            className="flex-1 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-200/50 dark:shadow-none"
+                        >
+                            <Plus size={16} /> Save Segment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Campaign Detail Modal */}
+      {selectedCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedCampaign(null)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" 
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="flex items-center gap-3">
+                         <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            {getTypeIcon(selectedCampaign.type)}
+                         </div>
+                         <div>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{selectedCampaign.name}</h3>
+                            <div className="mt-1">
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${getStatusColor(selectedCampaign.status)} px-2 py-0.5 rounded-full border`}>
+                                    {selectedCampaign.status}
+                                </span>
+                            </div>
+                         </div>
+                    </div>
+                    <button onClick={() => setSelectedCampaign(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors rounded-full p-1 hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                    {/* Key Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Total Revenue</span>
+                            <span className="text-xl font-bold text-slate-900 dark:text-white">{formatCurrency(selectedCampaign.revenue)}</span>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Audience Size</span>
+                            <span className="text-xl font-bold text-slate-900 dark:text-white">{selectedCampaign.sent.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {/* Funnel Metrics */}
+                    <div className="space-y-4">
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">Engagement Funnel</h4>
+                        
+                        {selectedCampaign.openRate !== undefined && (
+                            <div>
+                                <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-slate-600 dark:text-slate-300">Open Rate</span>
+                                    <span className="font-bold text-slate-900 dark:text-white">{selectedCampaign.openRate}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                    <div className="bg-blue-500 h-full rounded-full" style={{ width: `${selectedCampaign.openRate}%` }}></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-600 dark:text-slate-300">Click Rate</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{selectedCampaign.clickRate}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${selectedCampaign.clickRate}%` }}></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-600 dark:text-slate-300">Conversion Rate</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{selectedCampaign.conversionRate}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${selectedCampaign.conversionRate}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="pt-2 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700">
+                         <button className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                            View Report
+                         </button>
+                         <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                            Edit Campaign
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Create Campaign Modal */}
       {isCampaignModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsCampaignModalOpen(false)}>
@@ -172,8 +502,8 @@ export const AutomationPage: React.FC = () => {
                         
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 block">Select Channel</label>
-                            <div className="grid grid-cols-3 gap-3">
-                                {['Email', 'SMS', 'Social'].map((channel) => (
+                            <div className="grid grid-cols-4 gap-3">
+                                {['Email', 'SMS', 'Social', 'Ad'].map((channel) => (
                                     <div 
                                         key={channel}
                                         onClick={() => setNewCampaign({...newCampaign, channel: channel as any})}
@@ -186,6 +516,7 @@ export const AutomationPage: React.FC = () => {
                                         {channel === 'Email' && <Mail size={24} />}
                                         {channel === 'SMS' && <Smartphone size={24} />}
                                         {channel === 'Social' && <Share2 size={24} />}
+                                        {channel === 'Ad' && <Globe size={24} />}
                                         <span className="text-xs font-bold">{channel}</span>
                                     </div>
                                 ))}
@@ -298,9 +629,9 @@ export const AutomationPage: React.FC = () => {
                     if (activeTab === 'marketing') {
                         setIsCampaignModalOpen(true);
                     } else if (activeTab === 'segments') {
-                        // Handle segment creation (mock)
+                        setIsSegmentModalOpen(true);
                     } else {
-                        // Handle workflow creation (mock)
+                        setIsWorkflowModalOpen(true);
                     }
                 }}
                 className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200/50 dark:shadow-none"
@@ -334,7 +665,7 @@ export const AutomationPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 relative">
                                 <button 
                                     onClick={() => toggleStatus(workflow.id)}
                                     className={`p-2 rounded-lg transition-colors ${workflow.status === 'active' ? 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
@@ -342,9 +673,49 @@ export const AutomationPage: React.FC = () => {
                                 >
                                     {workflow.status === 'active' ? <Pause size={16} /> : <Play size={16} />}
                                 </button>
-                                <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveWorkflowMenu(activeWorkflowMenu === workflow.id ? null : workflow.id);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                >
                                     <Settings size={16} />
                                 </button>
+
+                                {/* Context Menu */}
+                                {activeWorkflowMenu === workflow.id && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setActiveWorkflowMenu(null)}></div>
+                                        <div className="absolute top-10 right-0 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-20 animate-in fade-in zoom-in-95 duration-200">
+                                            <button 
+                                                onClick={() => setActiveWorkflowMenu(null)}
+                                                className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2"
+                                            >
+                                                <Edit2 size={14} className="text-slate-400" /> Edit Workflow
+                                            </button>
+                                            <button 
+                                                onClick={() => setActiveWorkflowMenu(null)}
+                                                className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2"
+                                            >
+                                                <Copy size={14} className="text-slate-400" /> Duplicate
+                                            </button>
+                                            <button 
+                                                onClick={() => setActiveWorkflowMenu(null)}
+                                                className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2"
+                                            >
+                                                <FileText size={14} className="text-slate-400" /> View Logs
+                                            </button>
+                                            <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                                            <button 
+                                                onClick={() => deleteWorkflow(workflow.id)}
+                                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2"
+                                            >
+                                                <Trash2 size={14} /> Delete
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -409,14 +780,48 @@ export const AutomationPage: React.FC = () => {
             {/* Segments Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {segments.map(segment => (
-                    <div key={segment.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-lg transition-all hover:border-indigo-200 dark:hover:border-indigo-800 group">
+                    <div key={segment.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-lg transition-all hover:border-indigo-200 dark:hover:border-indigo-800 group relative">
                         <div className="flex justify-between items-start mb-4">
                             <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
                                 <Users size={22} />
                             </div>
-                            <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveSegmentMenu(activeSegmentMenu === segment.id ? null : segment.id);
+                                }}
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                            >
                                 <MoreHorizontal size={18} />
                             </button>
+
+                            {/* Segment Context Menu */}
+                            {activeSegmentMenu === segment.id && (
+                                <>
+                                    <div className="fixed inset-0 z-10" onClick={() => setActiveSegmentMenu(null)}></div>
+                                    <div className="absolute top-12 right-4 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-20 animate-in fade-in zoom-in-95 duration-200">
+                                        <button 
+                                            onClick={() => setActiveSegmentMenu(null)}
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2"
+                                        >
+                                            <Edit2 size={14} className="text-slate-400" /> Edit Segment
+                                        </button>
+                                        <button 
+                                            onClick={() => setActiveSegmentMenu(null)}
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2"
+                                        >
+                                            <Users size={14} className="text-slate-400" /> View Contacts
+                                        </button>
+                                        <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                                        <button 
+                                            onClick={() => deleteSegment(segment.id)}
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2"
+                                        >
+                                            <Trash2 size={14} /> Delete Segment
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{segment.name}</h3>
@@ -453,7 +858,10 @@ export const AutomationPage: React.FC = () => {
                 ))}
                 
                 {/* Add New Segment Card */}
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center justify-center text-center hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-all cursor-pointer group h-full min-h-[250px]">
+                <div 
+                    onClick={() => setIsSegmentModalOpen(true)}
+                    className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center justify-center text-center hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-all cursor-pointer group h-full min-h-[250px]"
+                >
                     <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
                         <Plus size={24} className="text-indigo-500" />
                     </div>
@@ -510,8 +918,16 @@ export const AutomationPage: React.FC = () => {
                   {/* Campaign Table */}
                   <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
                       <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white">Campaign Performance</h3>
-                          <button className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">View All</button>
+                          <div className="flex items-center gap-4">
+                              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Campaign Performance</h3>
+                              <button 
+                                  onClick={() => setIsCampaignModalOpen(true)}
+                                  className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+                              >
+                                  <Plus size={14} /> New Campaign
+                              </button>
+                          </div>
+                          <button className="text-xs font-medium text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">View All</button>
                       </div>
                       <div className="flex-1 overflow-x-auto">
                           <table className="w-full text-left border-collapse min-w-[600px]">
@@ -526,7 +942,11 @@ export const AutomationPage: React.FC = () => {
                               </thead>
                               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                                   {campaigns.map((campaign) => (
-                                      <tr key={campaign.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+                                      <tr 
+                                        key={campaign.id} 
+                                        onClick={() => setSelectedCampaign(campaign)}
+                                        className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors cursor-pointer"
+                                      >
                                           <td className="p-4 pl-6">
                                               <div>
                                                   <p className="font-bold text-sm text-slate-900 dark:text-white">{campaign.name}</p>

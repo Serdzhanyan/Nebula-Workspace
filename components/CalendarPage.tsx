@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, MapPin, User, Video, Filter, MoreHorizontal, X, AlignLeft, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, MapPin, User, Video, Filter, MoreHorizontal, X, AlignLeft, Users, Check, Save, Tag } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
@@ -18,6 +18,24 @@ export const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  
+  // Modal States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  // Filter State
+  const [visibleTypes, setVisibleTypes] = useState<string[]>(['meeting', 'call', 'task', 'deadline']);
+
+  // New Event Form State
+  const [newEventData, setNewEventData] = useState({
+      title: '',
+      date: new Date().toISOString().split('T')[0],
+      startTime: '09:00',
+      endTime: '10:00',
+      type: 'meeting' as CalendarEvent['type'],
+      location: '',
+      description: ''
+  });
   
   // Mock Events
   const generateEvents = (year: number, month: number) => {
@@ -155,7 +173,8 @@ export const CalendarPage: React.FC = () => {
       return events.filter(e => 
           e.date.getDate() === date.getDate() && 
           e.date.getMonth() === date.getMonth() && 
-          e.date.getFullYear() === date.getFullYear()
+          e.date.getFullYear() === date.getFullYear() &&
+          visibleTypes.includes(e.type)
       );
   };
 
@@ -182,11 +201,218 @@ export const CalendarPage: React.FC = () => {
       setSelectedEvent(event);
   };
 
+  const handleAddEvent = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newEventData.title) return;
+
+      const newEvent: CalendarEvent = {
+          id: `new-${Date.now()}`,
+          title: newEventData.title,
+          date: new Date(newEventData.date),
+          startTime: newEventData.startTime, // Simplified for mock, ideally would format
+          endTime: newEventData.endTime,
+          type: newEventData.type,
+          location: newEventData.location,
+          description: newEventData.description,
+          attendees: ['You']
+      };
+
+      setEvents([...events, newEvent]);
+      setIsAddModalOpen(false);
+      
+      // Reset form
+      setNewEventData({
+          title: '',
+          date: new Date().toISOString().split('T')[0],
+          startTime: '09:00',
+          endTime: '10:00',
+          type: 'meeting',
+          location: '',
+          description: ''
+      });
+  };
+
+  const toggleVisibleType = (type: string) => {
+      setVisibleTypes(prev => 
+          prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+      );
+  };
+
   const selectedDayEvents = getEventsForDate(selectedDate);
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       
+      {/* Add Event Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsAddModalOpen(false)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" 
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Plus size={20} className="text-indigo-600 dark:text-indigo-400" />
+                        Create New Event
+                    </h3>
+                    <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleAddEvent} className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Event Title</label>
+                        <input 
+                            required
+                            type="text" 
+                            placeholder="e.g. Q4 Planning Meeting"
+                            value={newEventData.title}
+                            onChange={(e) => setNewEventData({...newEventData, title: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Type</label>
+                            <select 
+                                value={newEventData.type}
+                                onChange={(e) => setNewEventData({...newEventData, type: e.target.value as any})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            >
+                                <option value="meeting">Meeting</option>
+                                <option value="call">Call</option>
+                                <option value="task">Task</option>
+                                <option value="deadline">Deadline</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Date</label>
+                            <input 
+                                type="date" 
+                                value={newEventData.date}
+                                onChange={(e) => setNewEventData({...newEventData, date: e.target.value})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Start Time</label>
+                            <input 
+                                type="time" 
+                                value={newEventData.startTime}
+                                onChange={(e) => setNewEventData({...newEventData, startTime: e.target.value})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">End Time</label>
+                            <input 
+                                type="time" 
+                                value={newEventData.endTime}
+                                onChange={(e) => setNewEventData({...newEventData, endTime: e.target.value})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Location (Optional)</label>
+                        <input 
+                            type="text" 
+                            placeholder="e.g. Room 302 or Zoom Link"
+                            value={newEventData.location}
+                            onChange={(e) => setNewEventData({...newEventData, location: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Description</label>
+                        <textarea 
+                            rows={3}
+                            placeholder="Add details about the event..."
+                            value={newEventData.description}
+                            onChange={(e) => setNewEventData({...newEventData, description: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white resize-none"
+                        />
+                    </div>
+
+                    <div className="pt-2 flex gap-3">
+                        <button 
+                            type="button" 
+                            onClick={() => setIsAddModalOpen(false)}
+                            className="flex-1 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200/50 dark:shadow-none flex items-center justify-center gap-2"
+                        >
+                            <Save size={16} /> Save Event
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* View Settings Modal */}
+      {isViewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsViewModalOpen(false)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" 
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Filter size={20} className="text-indigo-600 dark:text-indigo-400" />
+                        Calendar Filters
+                    </h3>
+                    <button onClick={() => setIsViewModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <div className="p-6">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3 block">Visible Event Types</label>
+                    <div className="space-y-2">
+                        {['meeting', 'call', 'task', 'deadline'].map(type => (
+                            <div 
+                                key={type} 
+                                onClick={() => toggleVisibleType(type)}
+                                className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                                    visibleTypes.includes(type) 
+                                    ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800' 
+                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${getEventTypeStyles(type)}`}>
+                                        {type}
+                                    </span>
+                                    <span className="text-sm font-medium capitalize text-slate-700 dark:text-slate-200">{type}</span>
+                                </div>
+                                {visibleTypes.includes(type) && <Check size={16} className="text-indigo-600 dark:text-indigo-400" />}
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <button 
+                        onClick={() => setIsViewModalOpen(false)}
+                        className="w-full mt-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-sm"
+                    >
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Event Details Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedEvent(null)}>
@@ -296,10 +522,16 @@ export const CalendarPage: React.FC = () => {
         </div>
         
         <div className="flex gap-2">
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
-                <Filter size={16} /> View
+            <button 
+                onClick={() => setIsViewModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm"
+            >
+                <Filter size={16} /> View / Sort
             </button>
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200/50 dark:shadow-none">
+            <button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200/50 dark:shadow-none"
+            >
                 <Plus size={18} /> Add Event
             </button>
         </div>

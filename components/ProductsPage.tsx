@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, MoreHorizontal, Package, Tag, DollarSign, Archive, AlertTriangle, CheckCircle2, XCircle, Edit2, Trash2, X, Save, Image as ImageIcon, MapPin, Box, ShoppingCart, Truck, ArrowRight, ClipboardList, Clock, Minus, RefreshCw } from 'lucide-react';
 
 interface ProductOrder {
@@ -31,7 +31,19 @@ export const ProductsPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Drawer & Edit State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
+  const [editedProduct, setEditedProduct] = useState<Product | null>(null);
+
+  // Initialize editedProduct when selectedProduct changes
+  useEffect(() => {
+    if (selectedProduct) {
+        setEditedProduct(selectedProduct);
+        setIsEditingProduct(false);
+    }
+  }, [selectedProduct]);
 
   // Mock Data
   const [products, setProducts] = useState<Product[]>([
@@ -122,7 +134,7 @@ export const ProductsPage: React.FC = () => {
     },
   ]);
 
-  // Form State
+  // Form State for Add Modal
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '',
     sku: '',
@@ -177,6 +189,27 @@ export const ProductsPage: React.FC = () => {
       setProducts(prev => prev.map(p => p.id === selectedProduct.id ? updatedProduct : p));
   };
 
+  const handleSaveChanges = () => {
+      if (!editedProduct || !selectedProduct) return;
+      
+      const finalProduct = {
+          ...editedProduct,
+          status: (editedProduct.stock === 0 ? 'Out of Stock' : editedProduct.stock < 10 ? 'Low Stock' : 'In Stock') as any
+      };
+
+      setProducts(prev => prev.map(p => p.id === selectedProduct.id ? finalProduct : p));
+      setSelectedProduct(finalProduct);
+      setIsEditingProduct(false);
+  };
+
+  const handleDeleteProduct = () => {
+      if (!selectedProduct) return;
+      if (window.confirm(`Are you sure you want to delete ${selectedProduct.name}?`)) {
+          setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+          setSelectedProduct(null);
+      }
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           p.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -211,28 +244,109 @@ export const ProductsPage: React.FC = () => {
                 
                 {/* Drawer Header */}
                 <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-start bg-slate-50/50 dark:bg-slate-900/50">
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-1">
                         <img src={selectedProduct.image} alt={selectedProduct.name} className="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-700 bg-white" />
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-mono text-slate-400">{selectedProduct.sku}</span>
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(selectedProduct.status)}`}>
-                                    {selectedProduct.status}
-                                </span>
-                            </div>
-                            <h3 className="font-bold text-xl text-slate-900 dark:text-white leading-tight mb-1">{selectedProduct.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                                <Tag size={14} /> {selectedProduct.category}
-                            </div>
+                        <div className="flex-1 min-w-0">
+                            {isEditingProduct ? (
+                                <div className="space-y-2">
+                                    <input 
+                                        type="text" 
+                                        value={editedProduct?.name} 
+                                        onChange={e => setEditedProduct(prev => prev ? {...prev, name: e.target.value} : null)}
+                                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-lg font-bold text-slate-900 dark:text-white"
+                                    />
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={editedProduct?.sku} 
+                                            onChange={e => setEditedProduct(prev => prev ? {...prev, sku: e.target.value} : null)}
+                                            className="w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs font-mono"
+                                        />
+                                        <select
+                                            value={editedProduct?.category}
+                                            onChange={e => setEditedProduct(prev => prev ? {...prev, category: e.target.value} : null)}
+                                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs"
+                                        >
+                                            <option>Software</option>
+                                            <option>Hardware</option>
+                                            <option>Service</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-mono text-slate-400">{selectedProduct.sku}</span>
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(selectedProduct.status)}`}>
+                                            {selectedProduct.status}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-bold text-xl text-slate-900 dark:text-white leading-tight mb-1">{selectedProduct.name}</h3>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        <Tag size={14} /> {selectedProduct.category}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
-                    <button onClick={() => setSelectedProduct(null)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400">
-                        <X size={20} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {isEditingProduct ? (
+                            <>
+                                <button 
+                                    onClick={() => setIsEditingProduct(false)}
+                                    className="p-2 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                    title="Cancel"
+                                >
+                                    <X size={20} />
+                                </button>
+                                <button 
+                                    onClick={handleSaveChanges}
+                                    className="p-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
+                                    title="Save Changes"
+                                >
+                                    <Save size={20} />
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button 
+                                    onClick={handleDeleteProduct}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                                <button 
+                                    onClick={() => setIsEditingProduct(true)}
+                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                >
+                                    <Edit2 size={20} />
+                                </button>
+                                <button onClick={() => setSelectedProduct(null)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
+                                    <X size={20} />
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50 dark:bg-slate-900">
                     
+                    {/* Description Section */}
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-3 text-sm">Description</h4>
+                        {isEditingProduct ? (
+                            <textarea 
+                                value={editedProduct?.description}
+                                onChange={e => setEditedProduct(prev => prev ? {...prev, description: e.target.value} : null)}
+                                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
+                            />
+                        ) : (
+                            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {selectedProduct.description}
+                            </p>
+                        )}
+                    </div>
+
                     {/* Warehouse & Inventory Section */}
                     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                         <div className="flex justify-between items-center mb-6">
@@ -240,38 +354,73 @@ export const ProductsPage: React.FC = () => {
                                 <Box className="text-indigo-500" size={20} /> Inventory Management
                             </h4>
                             <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={() => handleUpdateStock(-1)}
-                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                                    title="Decrease Stock"
-                                >
-                                    <Minus size={16} className="text-slate-500" />
-                                </button>
-                                <span className="text-sm font-bold w-8 text-center">{selectedProduct.stock}</span>
-                                <button 
-                                    onClick={() => handleUpdateStock(1)}
-                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                                    title="Increase Stock"
-                                >
-                                    <Plus size={16} className="text-slate-500" />
-                                </button>
+                                {isEditingProduct ? (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-slate-500 uppercase font-bold">Set Stock:</span>
+                                        <input 
+                                            type="number" 
+                                            value={editedProduct?.stock}
+                                            onChange={e => setEditedProduct(prev => prev ? {...prev, stock: parseInt(e.target.value)} : null)}
+                                            className="w-20 px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded text-sm text-center font-bold"
+                                        />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button 
+                                            onClick={() => handleUpdateStock(-1)}
+                                            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                            title="Decrease Stock"
+                                        >
+                                            <Minus size={16} className="text-slate-500" />
+                                        </button>
+                                        <span className="text-sm font-bold w-8 text-center">{selectedProduct.stock}</span>
+                                        <button 
+                                            onClick={() => handleUpdateStock(1)}
+                                            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                            title="Increase Stock"
+                                        >
+                                            <Plus size={16} className="text-slate-500" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
                                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Location</div>
-                                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
-                                    <MapPin size={18} className="text-red-500" />
-                                    {selectedProduct.warehouseLocation}
-                                </div>
+                                {isEditingProduct ? (
+                                    <input 
+                                        type="text" 
+                                        value={editedProduct?.warehouseLocation}
+                                        onChange={e => setEditedProduct(prev => prev ? {...prev, warehouseLocation: e.target.value} : null)}
+                                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-sm font-medium"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
+                                        <MapPin size={18} className="text-red-500" />
+                                        {selectedProduct.warehouseLocation}
+                                    </div>
+                                )}
                             </div>
                             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Value</div>
-                                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
-                                    <DollarSign size={18} className="text-emerald-500" />
-                                    {formatCurrency(selectedProduct.price * selectedProduct.stock)}
-                                </div>
+                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Unit Price</div>
+                                {isEditingProduct ? (
+                                    <div className="relative">
+                                        <DollarSign size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input 
+                                            type="number" 
+                                            value={editedProduct?.price}
+                                            onChange={e => setEditedProduct(prev => prev ? {...prev, price: parseFloat(e.target.value)} : null)}
+                                            className="w-full pl-6 pr-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded text-sm font-medium"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
+                                        <DollarSign size={18} className="text-emerald-500" />
+                                        {formatCurrency(selectedProduct.price)}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

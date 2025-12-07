@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { ArrowLeft, DollarSign, Users, Briefcase, TrendingUp, Filter, Search, MoreHorizontal, Calendar, CheckCircle2, FileText, Zap, Inbox, Package, Heart, PieChart, CheckSquare, ChevronRight, BarChart3, ChevronDown, Settings } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, DollarSign, Users, Briefcase, TrendingUp, Filter, Search, MoreHorizontal, Calendar, CheckCircle2, FileText, Zap, Inbox, Package, Heart, PieChart, CheckSquare, ChevronRight, BarChart3, ChevronDown, Settings, X, Edit2, Trash2, Mail, Eye, Send, Save, Loader2 } from 'lucide-react';
 import { ContactsPage } from './ContactsPage';
 import { DealsPage } from './DealsPage';
 import { LeadsPage } from './LeadsPage';
@@ -41,14 +41,37 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
   const [stageFilter, setStageFilter] = useState("All");
   const [activeModule, setActiveModule] = useState("Overview"); // Default to Overview (Dashboard)
   const [expandedSections, setExpandedSections] = useState<string[]>(['Sales']);
+  
+  // Deal Modal & Menu State
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [activeMenuDealId, setActiveMenuDealId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const deals: Deal[] = [
+  // Edit & Email Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState<Deal | null>(null);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailData, setEmailData] = useState({ to: '', subject: '', message: '' });
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const [dashboardDeals, setDashboardDeals] = useState<Deal[]>([
     { id: '1', client: 'Acme Corp', value: '$125,000', stage: 'Negotiation', probability: 80, owner: 'Sarah Lee', lastContact: '2h ago', avatar: 'https://picsum.photos/100/100?random=10' },
     { id: '2', client: 'Stark Industries', value: '$1,200,000', stage: 'Proposal', probability: 45, owner: 'Alex Johnson', lastContact: '1d ago', avatar: 'https://picsum.photos/100/100?random=11' },
     { id: '3', client: 'Wayne Ent.', value: '$850,000', stage: 'Qualified', probability: 30, owner: 'Emma Watson', lastContact: '3d ago', avatar: 'https://picsum.photos/100/100?random=12' },
     { id: '4', client: 'Cyberdyne', value: '$45,000', stage: 'Closed', probability: 100, owner: 'James D.', lastContact: '1w ago', avatar: 'https://picsum.photos/100/100?random=13' },
     { id: '5', client: 'Massive Dynamic', value: '$320,000', stage: 'Lead', probability: 10, owner: 'Sarah Lee', lastContact: '4h ago', avatar: 'https://picsum.photos/100/100?random=14' },
-  ];
+  ]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenuDealId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getStageColor = (stage: string) => {
     switch (stage) {
@@ -60,7 +83,7 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
     }
   };
 
-  const filteredDeals = deals.filter(deal => {
+  const filteredDeals = dashboardDeals.filter(deal => {
       const matchesSearch = deal.client.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStage = stageFilter === "All" || deal.stage === stageFilter;
       return matchesSearch && matchesStage;
@@ -96,9 +119,257 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
     );
   };
 
+  const handleMenuAction = (action: string, deal: Deal) => {
+      setActiveMenuDealId(null);
+      if (action === 'view') {
+          setSelectedDeal(deal);
+      } else if (action === 'edit') {
+          setEditFormData(deal);
+          setIsEditModalOpen(true);
+      } else if (action === 'email') {
+          setEmailData({ to: deal.owner, subject: `Update regarding ${deal.client}`, message: '' });
+          setIsEmailModalOpen(true);
+      } else if (action === 'delete') {
+          if (window.confirm(`Are you sure you want to delete the deal for ${deal.client}?`)) {
+              setDashboardDeals(prev => prev.filter(d => d.id !== deal.id));
+          }
+      }
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!editFormData) return;
+      
+      setIsProcessing(true);
+      setTimeout(() => {
+          setDashboardDeals(prev => prev.map(d => d.id === editFormData.id ? editFormData : d));
+          setIsProcessing(false);
+          setIsEditModalOpen(false);
+          setEditFormData(null);
+      }, 800);
+  };
+
+  const handleSendEmail = (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsProcessing(true);
+      setTimeout(() => {
+          alert(`Email sent to ${emailData.to}`);
+          setIsProcessing(false);
+          setIsEmailModalOpen(false);
+          setEmailData({ to: '', subject: '', message: '' });
+      }, 800);
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       
+      {/* Edit Deal Modal */}
+      {isEditModalOpen && editFormData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsEditModalOpen(false)}>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Edit2 size={18} className="text-indigo-600 dark:text-indigo-400" /> Edit Deal
+                    </h3>
+                    <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Client</label>
+                        <input 
+                            type="text" 
+                            required
+                            value={editFormData.client}
+                            onChange={(e) => setEditFormData({...editFormData, client: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Value</label>
+                        <input 
+                            type="text" 
+                            required
+                            value={editFormData.value}
+                            onChange={(e) => setEditFormData({...editFormData, value: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Stage</label>
+                            <select 
+                                value={editFormData.stage}
+                                onChange={(e) => setEditFormData({...editFormData, stage: e.target.value as any})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            >
+                                <option value="Lead">Lead</option>
+                                <option value="Qualified">Qualified</option>
+                                <option value="Proposal">Proposal</option>
+                                <option value="Negotiation">Negotiation</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Probability (%)</label>
+                            <input 
+                                type="number"
+                                min="0" max="100"
+                                value={editFormData.probability}
+                                onChange={(e) => setEditFormData({...editFormData, probability: parseInt(e.target.value)})}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                    <button 
+                        type="submit" 
+                        disabled={isProcessing}
+                        className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200/50 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-70"
+                    >
+                        {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {isEmailModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsEmailModalOpen(false)}>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Mail size={18} className="text-indigo-600 dark:text-indigo-400" /> Email Deal Owner
+                    </h3>
+                    <button onClick={() => setIsEmailModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                <form onSubmit={handleSendEmail} className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">To</label>
+                        <input 
+                            type="text" 
+                            disabled
+                            value={emailData.to}
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Subject</label>
+                        <input 
+                            type="text" 
+                            required
+                            value={emailData.subject}
+                            onChange={(e) => setEmailData({...emailData, subject: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Message</label>
+                        <textarea 
+                            required
+                            rows={4}
+                            value={emailData.message}
+                            onChange={(e) => setEmailData({...emailData, message: e.target.value})}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white resize-none"
+                            placeholder="Type your message here..."
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        disabled={isProcessing}
+                        className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200/50 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-70"
+                    >
+                        {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                        Send Email
+                    </button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Deal Detail Modal */}
+      {selectedDeal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedDeal(null)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm">
+                            {selectedDeal.client.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-none">{selectedDeal.client}</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">ID: #{selectedDeal.id.padStart(4, '0')}</p>
+                        </div>
+                    </div>
+                    <button onClick={() => setSelectedDeal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Deal Value</span>
+                            <span className="text-xl font-bold text-slate-900 dark:text-white">{selectedDeal.value}</span>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Probability</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl font-bold text-slate-900 dark:text-white">{selectedDeal.probability}%</span>
+                                <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden max-w-[60px]">
+                                    <div className="h-full bg-emerald-500" style={{ width: `${selectedDeal.probability}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Stage</span>
+                            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${getStageColor(selectedDeal.stage)}`}>
+                                {selectedDeal.stage}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Owner</span>
+                            <div className="flex items-center gap-2">
+                                <img src={selectedDeal.avatar} alt={selectedDeal.owner} className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-600" />
+                                <span className="text-sm font-medium text-slate-900 dark:text-white">{selectedDeal.owner}</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Last Contact</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-white">{selectedDeal.lastContact}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <button 
+                            onClick={() => {
+                                setSelectedDeal(null);
+                                setEditFormData(selectedDeal);
+                                setIsEditModalOpen(true);
+                            }}
+                            className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200/50 dark:shadow-none"
+                        >
+                            Edit Deal
+                        </button>
+                        <button className="flex-1 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            Contact Client
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Left Sidebar (Drawer) */}
       <div className="w-full md:w-72 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-20 shadow-xl shadow-slate-200/50 dark:shadow-none">
          <div className="p-6 flex items-center gap-3">
@@ -293,7 +564,7 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
                     </div>
 
                     {/* Deals List */}
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 min-h-[400px]">
                         {/* Toolbar */}
                         <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row gap-4 bg-slate-50/30 dark:bg-slate-800/30">
                             <div className="relative flex-1">
@@ -325,7 +596,7 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-x-auto">
+                        <div className="flex-1 overflow-x-auto pb-10">
                             <table className="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
@@ -340,14 +611,18 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                                 {filteredDeals.map(deal => (
-                                    <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group">
+                                    <tr 
+                                        key={deal.id} 
+                                        onClick={() => setSelectedDeal(deal)}
+                                        className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group"
+                                    >
                                         <td className="py-4 pl-6 pr-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-sm shadow-sm border border-slate-200 dark:border-slate-600">
                                                     {deal.client.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <span className="block font-bold text-sm text-slate-900 dark:text-white">{deal.client}</span>
+                                                    <span className="block font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{deal.client}</span>
                                                     <span className="text-xs text-slate-500 dark:text-slate-400">ID: #{deal.id.padStart(4, '0')}</span>
                                                 </div>
                                             </div>
@@ -387,10 +662,51 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
                                         <td className="px-4 py-4 text-sm text-slate-500 dark:text-slate-400">
                                             {deal.lastContact}
                                         </td>
-                                        <td className="px-4 py-4 pr-6 text-right">
-                                            <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                        <td className="px-4 py-4 pr-6 text-right relative" ref={activeMenuDealId === deal.id ? menuRef : null}>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuDealId(activeMenuDealId === deal.id ? null : deal.id);
+                                                }}
+                                                className={`p-2 rounded-lg transition-colors ${
+                                                    activeMenuDealId === deal.id
+                                                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
+                                                    : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
+                                                }`}
+                                            >
                                                 <MoreHorizontal size={18} />
                                             </button>
+
+                                            {/* Context Menu */}
+                                            {activeMenuDealId === deal.id && (
+                                                <div className="absolute right-8 top-10 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-30 animate-in fade-in zoom-in-95 duration-200 text-left">
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMenuAction('view', deal); }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                                    >
+                                                        <Eye size={14} className="text-slate-400" /> View Details
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMenuAction('edit', deal); }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                                    >
+                                                        <Edit2 size={14} className="text-slate-400" /> Edit Deal
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMenuAction('email', deal); }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                                    >
+                                                        <Mail size={14} className="text-slate-400" /> Email Owner
+                                                    </button>
+                                                    <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMenuAction('delete', deal); }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                                                    >
+                                                        <Trash2 size={14} /> Delete
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

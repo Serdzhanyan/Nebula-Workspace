@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, BarChart3, Settings, MoreHorizontal, ArrowRight, TrendingUp, Users, DollarSign, Filter, ChevronRight, X, Save, Trash2, GripVertical, PieChart } from 'lucide-react';
+import { Plus, BarChart3, Settings, MoreHorizontal, ArrowRight, TrendingUp, Users, DollarSign, Filter, ChevronRight, X, Save, Trash2, GripVertical, PieChart, Info, Calendar } from 'lucide-react';
 import { ResponsiveContainer, FunnelChart, Funnel, LabelList, Tooltip, Cell } from 'recharts';
 
 interface FunnelStage {
@@ -59,6 +59,7 @@ export const SalesFunnelsPage: React.FC = () => {
   ]);
 
   const [selectedFunnel, setSelectedFunnel] = useState<FunnelData>(funnels[0]);
+  const [funnelInModal, setFunnelInModal] = useState<FunnelData | null>(null);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
@@ -90,6 +91,68 @@ export const SalesFunnelsPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Funnel Detail Modal */}
+      {funnelInModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setFunnelInModal(null)}>
+            <div 
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <Filter size={20} className="text-indigo-600 dark:text-indigo-400" /> 
+                        Funnel Details
+                    </h3>
+                    <button onClick={() => setFunnelInModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors rounded-full p-1 hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="p-6 space-y-6">
+                    <div>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Funnel Name</span>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{funnelInModal.name}</h2>
+                        <span className={`inline-flex mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium border ${funnelInModal.active ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                            {funnelInModal.active ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Value</span>
+                            <span className="text-xl font-bold text-slate-900 dark:text-white">{formatCurrency(funnelInModal.totalValue)}</span>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Conversion</span>
+                            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{funnelInModal.avgConversion}%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-3">Stages Configuration</h4>
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            {funnelInModal.stages.map((stage, i) => (
+                                <div key={i} className="flex justify-between items-center text-sm p-2 rounded bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                            {i + 1}
+                                        </div>
+                                        <span className="text-slate-700 dark:text-slate-200 font-medium">{stage.name}</span>
+                                    </div>
+                                    <span className="text-slate-500 dark:text-slate-400 text-xs">{stage.conversionRate}% Conv.</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-4">
+                        <Calendar size={12} /> Created: Oct 24, 2023 • Last Modified: 2 days ago
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-start md:items-center">
         <div>
@@ -130,7 +193,7 @@ export const SalesFunnelsPage: React.FC = () => {
                      <div 
                         key={funnel.id}
                         onClick={() => setSelectedFunnel(funnel)}
-                        className={`p-3 rounded-xl cursor-pointer transition-all border ${
+                        className={`p-3 rounded-xl cursor-pointer transition-all border group relative ${
                            selectedFunnel.id === funnel.id 
                            ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 ring-1 ring-indigo-500/20' 
                            : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-700/30'
@@ -147,6 +210,18 @@ export const SalesFunnelsPage: React.FC = () => {
                            <span>•</span>
                            <span>{funnel.type}</span>
                         </div>
+                        
+                        {/* Info Button */}
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setFunnelInModal(funnel);
+                            }}
+                            className="absolute right-2 top-2 p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
+                            title="View Details"
+                        >
+                            <Info size={14} />
+                        </button>
                      </div>
                   ))}
                </div>

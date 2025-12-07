@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, AlertCircle, MessageSquare, CheckCircle2, Clock, MoreHorizontal, User, Tag, Send, X, Inbox, ThumbsUp, ThumbsDown, HelpCircle, ChevronRight } from 'lucide-react';
+import { Search, Filter, AlertCircle, MessageSquare, CheckCircle2, Clock, MoreHorizontal, User, Tag, Send, X, Inbox, ThumbsUp, ThumbsDown, HelpCircle, ChevronRight, Lock, Globe, ChevronDown } from 'lucide-react';
 
 interface Request {
   id: string;
@@ -22,6 +22,7 @@ export const RequestsPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [isInternalNote, setIsInternalNote] = useState(false);
 
   const [requests, setRequests] = useState<Request[]>([
     {
@@ -130,7 +131,12 @@ export const RequestsPage: React.FC = () => {
 
     const updatedRequest = {
         ...selectedRequest,
-        messages: [...selectedRequest.messages, { sender: 'You', text: replyText, time: 'Just now', internal: false }]
+        messages: [...selectedRequest.messages, { 
+            sender: 'You', 
+            text: replyText, 
+            time: 'Just now', 
+            internal: isInternalNote 
+        }]
     };
 
     setRequests(requests.map(r => r.id === selectedRequest.id ? updatedRequest : r));
@@ -141,6 +147,20 @@ export const RequestsPage: React.FC = () => {
   const updateStatus = (newStatus: Request['status']) => {
       if (!selectedRequest) return;
       const updatedRequest = { ...selectedRequest, status: newStatus };
+      setRequests(requests.map(r => r.id === selectedRequest.id ? updatedRequest : r));
+      setSelectedRequest(updatedRequest);
+  };
+
+  const updateAssignee = (newAssignee: string) => {
+      if (!selectedRequest) return;
+      const updatedRequest = { ...selectedRequest, assignee: newAssignee };
+      setRequests(requests.map(r => r.id === selectedRequest.id ? updatedRequest : r));
+      setSelectedRequest(updatedRequest);
+  };
+
+  const updatePriority = (newPriority: Request['priority']) => {
+      if (!selectedRequest) return;
+      const updatedRequest = { ...selectedRequest, priority: newPriority };
       setRequests(requests.map(r => r.id === selectedRequest.id ? updatedRequest : r));
       setSelectedRequest(updatedRequest);
   };
@@ -170,7 +190,7 @@ export const RequestsPage: React.FC = () => {
                 </div>
 
                 {/* Drawer Actions */}
-                <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800">
+                <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mr-2">Status:</span>
                         <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
@@ -191,11 +211,19 @@ export const RequestsPage: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Assignee:</span>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg cursor-pointer">
-                            <div className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 flex items-center justify-center text-[10px] font-bold">
-                                {selectedRequest.assignee?.charAt(0) || 'U'}
-                            </div>
-                            <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{selectedRequest.assignee}</span>
+                        <div className="relative">
+                            <select 
+                                value={selectedRequest.assignee}
+                                onChange={(e) => updateAssignee(e.target.value)}
+                                className="appearance-none pl-3 pr-8 py-1.5 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                            >
+                                <option value="Unassigned">Unassigned</option>
+                                <option value="Alex J.">Alex J.</option>
+                                <option value="Sarah L.">Sarah L.</option>
+                                <option value="James D.">James D.</option>
+                                <option value="Mark V.">Mark V.</option>
+                            </select>
+                            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                         </div>
                     </div>
                 </div>
@@ -208,11 +236,25 @@ export const RequestsPage: React.FC = () => {
                             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <User size={16} className="text-slate-400" /> {selectedRequest.customer}
                             </h4>
-                            <span className={`flex items-center gap-1 text-xs font-medium ${selectedRequest.priority === 'High' ? 'text-red-600' : 'text-slate-500'}`}>
-                                {getPriorityIcon(selectedRequest.priority)} {selectedRequest.priority} Priority
-                            </span>
+                            <div className="relative">
+                                <select 
+                                    value={selectedRequest.priority}
+                                    onChange={(e) => updatePriority(e.target.value as any)}
+                                    className={`appearance-none pl-2 pr-6 py-0.5 rounded text-xs font-medium cursor-pointer bg-transparent outline-none ${
+                                        selectedRequest.priority === 'High' ? 'text-red-600' : 
+                                        selectedRequest.priority === 'Medium' ? 'text-amber-500' : 'text-slate-500'
+                                    }`}
+                                >
+                                    <option value="High">High Priority</option>
+                                    <option value="Medium">Medium Priority</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    {getPriorityIcon(selectedRequest.priority)}
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
                             {selectedRequest.description}
                         </p>
                     </div>
@@ -227,7 +269,7 @@ export const RequestsPage: React.FC = () => {
 
                         {selectedRequest.messages.map((msg, i) => (
                             <div key={i} className={`flex flex-col ${msg.internal ? 'items-end' : 'items-start'}`}>
-                                <div className={`max-w-[85%] rounded-xl p-4 shadow-sm ${
+                                <div className={`max-w-[85%] rounded-xl p-4 shadow-sm relative ${
                                     msg.internal 
                                     ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30' 
                                     : msg.sender === 'You'
@@ -235,10 +277,12 @@ export const RequestsPage: React.FC = () => {
                                     : 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30'
                                 }`}>
                                     <div className="flex justify-between items-baseline mb-1 gap-4">
-                                        <span className={`text-xs font-bold ${
+                                        <span className={`text-xs font-bold flex items-center gap-1 ${
                                             msg.internal ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-200'
                                         }`}>
-                                            {msg.sender} {msg.internal && <span className="text-[10px] uppercase font-bold tracking-wide opacity-70 ml-1">(Internal Note)</span>}
+                                            {msg.internal && <Lock size={10} />}
+                                            {msg.sender} 
+                                            {msg.internal && <span className="uppercase tracking-wide opacity-70 ml-1 font-normal text-[10px]">(Internal Note)</span>}
                                         </span>
                                         <span className="text-[10px] text-slate-400">{msg.time}</span>
                                     </div>
@@ -251,19 +295,57 @@ export const RequestsPage: React.FC = () => {
 
                 {/* Reply Box */}
                 <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+                    {/* Reply Type Toggle */}
+                    <div className="flex gap-2 mb-2">
+                        <button 
+                            type="button"
+                            onClick={() => setIsInternalNote(false)}
+                            className={`text-xs font-medium px-3 py-1.5 rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                                !isInternalNote 
+                                ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white' 
+                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            }`}
+                        >
+                            <Globe size={12} /> Public Reply
+                        </button>
+                        <button 
+                            type="button"
+                            onClick={() => setIsInternalNote(true)}
+                            className={`text-xs font-medium px-3 py-1.5 rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                                isInternalNote 
+                                ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' 
+                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            }`}
+                        >
+                            <Lock size={12} /> Internal Note
+                        </button>
+                    </div>
+
                     <form onSubmit={handleSendReply}>
                         <div className="relative">
                             <textarea 
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Type a reply or internal note..."
-                                className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
+                                placeholder={isInternalNote ? "Add a private note for the team..." : "Type your reply to the customer..."}
+                                className={`w-full pl-4 pr-12 py-3 border rounded-b-xl rounded-tr-xl text-sm focus:ring-2 outline-none resize-none h-24 transition-all ${
+                                    isInternalNote 
+                                    ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-900/30 focus:ring-amber-200 dark:focus:ring-amber-900/50 text-slate-800 dark:text-slate-200 placeholder-amber-700/50' 
+                                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-indigo-500 text-slate-800 dark:text-slate-200'
+                                }`}
                             />
                             <div className="absolute bottom-3 right-3 flex gap-2">
                                 <button type="button" className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors" title="Attach File">
                                     <Tag size={16} />
                                 </button>
-                                <button type="submit" disabled={!replyText.trim()} className="p-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                                <button 
+                                    type="submit" 
+                                    disabled={!replyText.trim()} 
+                                    className={`p-1.5 text-white rounded-lg transition-colors disabled:opacity-50 ${
+                                        isInternalNote 
+                                        ? 'bg-amber-500 hover:bg-amber-600' 
+                                        : 'bg-indigo-600 hover:bg-indigo-700'
+                                    }`}
+                                >
                                     <Send size={16} />
                                 </button>
                             </div>

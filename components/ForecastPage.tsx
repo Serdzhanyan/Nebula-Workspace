@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   TrendingUp, 
   Target, 
@@ -27,21 +27,58 @@ import {
 export const ForecastPage: React.FC = () => {
   const [period, setPeriod] = useState('Q4 2024');
 
-  // Mock Data: Historical + Future Forecast
-  const data = [
-    { name: 'Jul', actual: 4200, forecast: 0, quota: 4000 },
-    { name: 'Aug', actual: 3800, forecast: 0, quota: 4000 },
-    { name: 'Sep', actual: 4500, forecast: 0, quota: 4000 },
-    { name: 'Oct', actual: 2100, forecast: 2800, quota: 4500 }, // Partial month actuals
-    { name: 'Nov', actual: 0, forecast: 5200, quota: 4500 },
-    { name: 'Dec', actual: 0, forecast: 6100, quota: 5000 },
-  ];
+  // Dynamic Data based on Period
+  const datasets: Record<string, any[]> = {
+    'Q3 2024': [
+        { name: 'Jul', actual: 4200, forecast: 0, quota: 4000 },
+        { name: 'Aug', actual: 3800, forecast: 0, quota: 4000 },
+        { name: 'Sep', actual: 4500, forecast: 0, quota: 4000 },
+    ],
+    'Q4 2024': [
+        { name: 'Oct', actual: 2100, forecast: 2800, quota: 4500 }, // Partial month actuals
+        { name: 'Nov', actual: 0, forecast: 5200, quota: 4500 },
+        { name: 'Dec', actual: 0, forecast: 6100, quota: 5000 },
+    ],
+    'FY 2025': [
+        { name: 'Q1', actual: 0, forecast: 15000, quota: 14000 },
+        { name: 'Q2', actual: 0, forecast: 18000, quota: 16000 },
+        { name: 'Q3', actual: 0, forecast: 14000, quota: 14000 },
+        { name: 'Q4', actual: 0, forecast: 22000, quota: 20000 },
+    ]
+  };
+
+  const currentData = datasets[period] || datasets['Q4 2024'];
+
+  // Calculate Metrics dynamically
+  const metrics = useMemo(() => {
+      const totalQuota = currentData.reduce((acc, item) => acc + item.quota, 0);
+      const totalActual = currentData.reduce((acc, item) => acc + item.actual, 0);
+      const totalForecast = currentData.reduce((acc, item) => acc + item.forecast, 0);
+      const totalProjected = totalActual + totalForecast;
+      const gap = totalProjected - totalQuota;
+      const attainment = (totalProjected / totalQuota) * 100;
+
+      return { totalProjected, totalQuota, gap, attainment };
+  }, [currentData]);
 
   const dealsToWatch = [
     { id: 1, client: 'Stark Industries', value: '$1.2M', stage: 'Proposal', prob: 45, closeDate: 'Nov 15' },
     { id: 2, client: 'Wayne Enterprises', value: '$850k', stage: 'Qualified', prob: 30, closeDate: 'Dec 10' },
     { id: 3, client: 'Umbrella Corp', value: '$550k', stage: 'Negotiation', prob: 75, closeDate: 'Oct 30' },
   ];
+
+  const handleExport = () => {
+    // Mock PDF download behavior
+    const element = document.createElement("a");
+    // In a real app, this would be a Blob from a PDF generation library like jspdf
+    const fileContent = `Sales Forecast Report - ${period}\n\nTotal Forecast: $${metrics.totalProjected}\nQuota: $${metrics.totalQuota}\nAttainment: ${metrics.attainment.toFixed(1)}%`;
+    const file = new Blob([fileContent], {type: 'application/pdf'});
+    element.href = URL.createObjectURL(file);
+    element.download = `Sales_Forecast_${period.replace(' ', '_')}.pdf`;
+    document.body.appendChild(element); 
+    element.click();
+    document.body.removeChild(element);
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -83,14 +120,17 @@ export const ForecastPage: React.FC = () => {
                     onChange={(e) => setPeriod(e.target.value)}
                     className="appearance-none pl-4 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-sm"
                 >
-                    <option>Q3 2024</option>
-                    <option>Q4 2024</option>
-                    <option>FY 2025</option>
+                    <option value="Q3 2024">Q3 2024</option>
+                    <option value="Q4 2024">Q4 2024</option>
+                    <option value="FY 2025">FY 2025</option>
                 </select>
                 <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
-            <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
-                <Download size={16} /> Export
+            <button 
+                onClick={handleExport}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm active:scale-95"
+            >
+                <Download size={16} /> Export PDF
             </button>
         </div>
       </div>
@@ -107,7 +147,7 @@ export const ForecastPage: React.FC = () => {
                             <ArrowUpRight size={16} />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">$14,100</h3>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">${metrics.totalProjected.toLocaleString()}</h3>
                     <p className="text-xs text-slate-500 mt-1">Weighted Pipeline</p>
                 </div>
 
@@ -118,19 +158,21 @@ export const ForecastPage: React.FC = () => {
                             <Target size={16} />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">$14,000</h3>
-                    <p className="text-xs text-slate-500 mt-1">101% Attainment</p>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">${metrics.totalQuota.toLocaleString()}</h3>
+                    <p className="text-xs text-slate-500 mt-1">{metrics.attainment.toFixed(0)}% Attainment</p>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <div className="flex justify-between items-start mb-2">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Gap to Quota</span>
-                        <div className="p-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
-                            <AlertTriangle size={16} />
+                        <div className={`p-1.5 rounded-lg ${metrics.gap >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600'}`}>
+                            {metrics.gap >= 0 ? <TrendingUp size={16} /> : <AlertTriangle size={16} />}
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-emerald-500">+$100</h3>
-                    <p className="text-xs text-slate-500 mt-1">Projected Surplus</p>
+                    <h3 className={`text-2xl font-bold ${metrics.gap >= 0 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                        {metrics.gap >= 0 ? '+' : ''}${metrics.gap.toLocaleString()}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">{metrics.gap >= 0 ? 'Projected Surplus' : 'Shortfall'}</p>
                 </div>
             </div>
 
@@ -147,7 +189,7 @@ export const ForecastPage: React.FC = () => {
                 
                 <div className="flex-1 w-full min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <ComposedChart data={currentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
                             <XAxis 
                                 dataKey="name" 
@@ -175,12 +217,12 @@ export const ForecastPage: React.FC = () => {
          {/* Sidebar: Details & Risks */}
          <div className="flex flex-col gap-6">
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-4">Forecast Category</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white mb-4">Forecast Category ({period})</h3>
                 <div className="space-y-4">
                     <div className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700/50">
                         <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Commit</span>
-                            <span className="font-bold text-slate-900 dark:text-white">$8,500</span>
+                            <span className="font-bold text-slate-900 dark:text-white">${(metrics.totalProjected * 0.6).toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full overflow-hidden">
                             <div className="bg-emerald-500 h-full rounded-full w-[60%]"></div>
@@ -191,12 +233,12 @@ export const ForecastPage: React.FC = () => {
                     <div className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700/50">
                         <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Best Case</span>
-                            <span className="font-bold text-slate-900 dark:text-white">$18,200</span>
+                            <span className="font-bold text-slate-900 dark:text-white">${(metrics.totalProjected * 1.2).toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full overflow-hidden">
                             <div className="bg-blue-500 h-full rounded-full w-[100%]"></div>
                         </div>
-                        <p className="text-xs text-slate-400 mt-1.5">Total pipeline value</p>
+                        <p className="text-xs text-slate-400 mt-1.5">Total pipeline upside</p>
                     </div>
 
                     <div className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700/50">
