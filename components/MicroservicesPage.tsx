@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Activity, Users, Shield, Key, Settings, Database, Briefcase } from 'lucide-react';
+import { ArrowLeft, Activity, Users, Shield, Key, Settings, Database, Briefcase, Phone } from 'lucide-react';
 
 interface ControlPanelPageProps {
   onBack: () => void;
@@ -9,9 +9,10 @@ interface ControlPanelPageProps {
   onNavigateToDCAP: () => void;
   onNavigateToCRM: () => void;
   onNavigateToConfig: () => void;
+  onNavigateToCallCenter: () => void;
 }
 
-export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ onBack, onNavigateToMetrics, onNavigateToUsers, onNavigateToDCAP, onNavigateToCRM, onNavigateToConfig }) => {
+export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ onBack, onNavigateToMetrics, onNavigateToUsers, onNavigateToDCAP, onNavigateToCRM, onNavigateToConfig, onNavigateToCallCenter }) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col">
       {/* Header */}
@@ -155,6 +156,36 @@ export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ onBack, onN
           </div>
           <div className="mt-6 flex items-center justify-between text-sm font-medium text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
             <span>Manage pipeline</span>
+            <ArrowLeft size={16} className="rotate-180" />
+          </div>
+        </div>
+
+        {/* Call Center Widget */}
+        <div 
+           onClick={onNavigateToCallCenter}
+           className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:ring-2 hover:ring-indigo-50/50 dark:hover:ring-indigo-900/20 transition-all cursor-pointer"
+         >
+           <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl">
+              <Phone size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Call Center</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Agents & Live Calls</p>
+            </div>
+          </div>
+          <div className="space-y-3 mt-6">
+             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
+                <span className="text-slate-600 dark:text-slate-300">Active Calls</span>
+                <span className="font-bold text-slate-900 dark:text-white">12</span>
+             </div>
+             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
+                <span className="text-slate-600 dark:text-slate-300">Agents Online</span>
+                <span className="font-bold text-emerald-500">8</span>
+             </div>
+          </div>
+          <div className="mt-6 flex items-center justify-between text-sm font-medium text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <span>Monitor activity</span>
             <ArrowLeft size={16} className="rotate-180" />
           </div>
         </div>

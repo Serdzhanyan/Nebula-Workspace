@@ -17,6 +17,7 @@ import { CRMSettingsPage } from './CRMSettingsPage';
 
 interface CRMPageProps {
   onBack: () => void;
+  initialModule?: string;
 }
 
 interface Deal {
@@ -36,11 +37,16 @@ interface MenuItem {
   children?: { label: string; icon: React.ElementType }[];
 }
 
-export const CRMPage: React.FC<CRMPageProps> = ({ onBack }) => {
+export const CRMPage: React.FC<CRMPageProps> = ({ onBack, initialModule = "Overview" }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [stageFilter, setStageFilter] = useState("All");
-  const [activeModule, setActiveModule] = useState("Overview"); // Default to Overview (Dashboard)
+  const [activeModule, setActiveModule] = useState(initialModule);
   const [expandedSections, setExpandedSections] = useState<string[]>(['Sales']);
+  
+  // Update active module when prop changes
+  useEffect(() => {
+      setActiveModule(initialModule);
+  }, [initialModule]);
   
   // Deal Modal & Menu State
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);

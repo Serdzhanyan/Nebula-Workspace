@@ -36,6 +36,7 @@ import { UserProfilePage } from './components/UserProfilePage';
 import { DCAPPage } from './components/DCAPPage';
 import { CRMPage } from './components/CRMPage';
 import { SystemConfigPage } from './components/SystemConfigPage';
+import { CallCenterPage } from './components/CallCenterPage';
 
 const Card: React.FC<{ 
   title: string; 
@@ -59,13 +60,14 @@ const Card: React.FC<{
 );
 
 function App() {
-  const [view, setView] = useState<'dashboard' | 'news' | 'newsDetail' | 'performance' | 'taskDetail' | 'training' | 'catalog' | 'courseDetail' | 'coursePreview' | 'notifications' | 'profile' | 'settings' | 'microservices' | 'systemMetrics' | 'userManagement' | 'userProfile' | 'dcap' | 'crm' | 'systemConfig'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'news' | 'newsDetail' | 'performance' | 'taskDetail' | 'training' | 'catalog' | 'courseDetail' | 'coursePreview' | 'notifications' | 'profile' | 'settings' | 'microservices' | 'systemMetrics' | 'userManagement' | 'userProfile' | 'dcap' | 'crm' | 'systemConfig' | 'callCenter'>('dashboard');
   const [previousView, setPreviousView] = useState<'dashboard' | 'performance'>('dashboard');
   const [selectedNewsItem, setSelectedNewsItem] = useState<NewsItem | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<TrainingModule | null>(null);
   const [selectedUserForManagement, setSelectedUserForManagement] = useState<User | null>(null);
   const [performanceTab, setPerformanceTab] = useState('tasks');
+  const [crmInitialModule, setCrmInitialModule] = useState('Overview');
   const [aboutUsText, setAboutUsText] = useState("Nebula Workspace is an AI-driven environment designed to boost productivity.");
   const [aboutLoading, setAboutLoading] = useState(false);
   
@@ -460,8 +462,12 @@ function App() {
                 onNavigateToMetrics={() => setView('systemMetrics')}
                 onNavigateToUsers={() => setView('userManagement')}
                 onNavigateToDCAP={() => setView('dcap')}
-                onNavigateToCRM={() => setView('crm')}
+                onNavigateToCRM={() => {
+                    setCrmInitialModule('Overview');
+                    setView('crm');
+                }}
                 onNavigateToConfig={() => setView('systemConfig')}
+                onNavigateToCallCenter={() => setView('callCenter')}
             />
         )}
 
@@ -494,12 +500,23 @@ function App() {
         {view === 'crm' && (
             <CRMPage 
                 onBack={() => setView('microservices')}
+                initialModule={crmInitialModule}
             />
         )}
 
         {view === 'systemConfig' && (
             <SystemConfigPage 
                 onBack={() => setView('microservices')}
+            />
+        )}
+
+        {view === 'callCenter' && (
+            <CallCenterPage 
+                onBack={() => setView('microservices')}
+                onNavigateToTicket={(id) => {
+                    setCrmInitialModule('Requests');
+                    setView('crm');
+                }}
             />
         )}
       </main>
