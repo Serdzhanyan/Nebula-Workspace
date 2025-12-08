@@ -51,7 +51,7 @@ export const CRMPage: React.FC<CRMPageProps> = ({ onBack, initialModule = "Overv
   // Deal Modal & Menu State
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [activeMenuDealId, setActiveMenuDealId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLTableDataCellElement>(null);
 
   // Edit & Email Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
