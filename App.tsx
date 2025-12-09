@@ -37,6 +37,8 @@ import { DCAPPage } from './components/DCAPPage';
 import { CRMPage } from './components/CRMPage';
 import { SystemConfigPage } from './components/SystemConfigPage';
 import { CallCenterPage } from './components/CallCenterPage';
+import { BackOfficePage } from './components/BackOfficePage';
+import { SMEPage } from './components/SMEPage';
 
 const Card: React.FC<{ 
   title: string; 
@@ -60,7 +62,7 @@ const Card: React.FC<{
 );
 
 function App() {
-  const [view, setView] = useState<'dashboard' | 'news' | 'newsDetail' | 'performance' | 'taskDetail' | 'training' | 'catalog' | 'courseDetail' | 'coursePreview' | 'notifications' | 'profile' | 'settings' | 'microservices' | 'systemMetrics' | 'userManagement' | 'userProfile' | 'dcap' | 'crm' | 'systemConfig' | 'callCenter'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'news' | 'newsDetail' | 'performance' | 'taskDetail' | 'training' | 'catalog' | 'courseDetail' | 'coursePreview' | 'notifications' | 'profile' | 'settings' | 'microservices' | 'systemMetrics' | 'userManagement' | 'userProfile' | 'dcap' | 'crm' | 'systemConfig' | 'callCenter' | 'backOffice' | 'sme'>('dashboard');
   const [previousView, setPreviousView] = useState<'dashboard' | 'performance'>('dashboard');
   const [selectedNewsItem, setSelectedNewsItem] = useState<NewsItem | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -211,7 +213,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 relative flex flex-col ${view === 'crm' ? 'h-screen overflow-hidden' : 'pb-12'}`}>
+    <div className={`min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 relative flex flex-col ${view === 'crm' || view === 'sme' ? 'h-screen overflow-hidden' : 'pb-12'}`}>
       <ChatDrawer isOpen={showChat} onClose={() => setShowChat(false)} />
 
       {/* Enrollment Modal */}
@@ -320,7 +322,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className={view === 'crm' ? "flex-1 flex flex-col overflow-hidden relative" : "max-w-7xl mx-auto px-6 py-8 w-full"}>
+      <main className={view === 'crm' || view === 'sme' ? "flex-1 flex flex-col overflow-hidden relative" : "max-w-7xl mx-auto px-6 py-8 w-full"}>
         {view === 'dashboard' && (
           <div className="animate-in fade-in zoom-in-95 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-min">
@@ -468,6 +470,7 @@ function App() {
                 }}
                 onNavigateToConfig={() => setView('systemConfig')}
                 onNavigateToCallCenter={() => setView('callCenter')}
+                onNavigateToBackOffice={() => setView('backOffice')}
             />
         )}
 
@@ -517,6 +520,19 @@ function App() {
                     setCrmInitialModule('Requests');
                     setView('crm');
                 }}
+            />
+        )}
+
+        {view === 'backOffice' && (
+            <BackOfficePage 
+                onBack={() => setView('microservices')}
+                onNavigateToSME={() => setView('sme')}
+            />
+        )}
+
+        {view === 'sme' && (
+            <SMEPage 
+                onBack={() => setView('backOffice')}
             />
         )}
       </main>

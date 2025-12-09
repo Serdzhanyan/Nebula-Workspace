@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Activity, Users, Shield, Key, Settings, Database, Briefcase, Phone } from 'lucide-react';
+import { ArrowLeft, Activity, Users, Shield, Key, Settings, Database, Briefcase, Phone, Building2 } from 'lucide-react';
 
 interface ControlPanelPageProps {
   onBack: () => void;
@@ -10,9 +10,19 @@ interface ControlPanelPageProps {
   onNavigateToCRM: () => void;
   onNavigateToConfig: () => void;
   onNavigateToCallCenter: () => void;
+  onNavigateToBackOffice: () => void;
 }
 
-export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ onBack, onNavigateToMetrics, onNavigateToUsers, onNavigateToDCAP, onNavigateToCRM, onNavigateToConfig, onNavigateToCallCenter }) => {
+export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ 
+  onBack, 
+  onNavigateToMetrics, 
+  onNavigateToUsers, 
+  onNavigateToDCAP, 
+  onNavigateToCRM, 
+  onNavigateToConfig, 
+  onNavigateToCallCenter,
+  onNavigateToBackOffice
+}) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col">
       {/* Header */}
@@ -186,6 +196,36 @@ export const MicroservicesPage: React.FC<ControlPanelPageProps> = ({ onBack, onN
           </div>
           <div className="mt-6 flex items-center justify-between text-sm font-medium text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
             <span>Monitor activity</span>
+            <ArrowLeft size={16} className="rotate-180" />
+          </div>
+        </div>
+
+        {/* Back Office Widget (New) */}
+        <div 
+           onClick={onNavigateToBackOffice}
+           className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:ring-2 hover:ring-indigo-50/50 dark:hover:ring-indigo-900/20 transition-all cursor-pointer"
+         >
+           <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-xl">
+              <Building2 size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Back Office</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Internal operations & admin</p>
+            </div>
+          </div>
+          <div className="space-y-3 mt-6">
+             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
+                <span className="text-slate-600 dark:text-slate-300">Pending Orders</span>
+                <span className="font-bold text-slate-900 dark:text-white">42</span>
+             </div>
+             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
+                <span className="text-slate-600 dark:text-slate-300">Open Invoices</span>
+                <span className="font-bold text-amber-500">18</span>
+             </div>
+          </div>
+          <div className="mt-6 flex items-center justify-between text-sm font-medium text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <span>Manage operations</span>
             <ArrowLeft size={16} className="rotate-180" />
           </div>
         </div>
