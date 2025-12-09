@@ -124,3 +124,59 @@ export interface ChatMessage {
   senderId: string; // 'me' or user ID
   timestamp: Date;
 }
+
+// SME Types
+export interface SMEShareholder {
+    name: string;
+    type: 'Individual' | 'Entity';
+    share: number;
+    role?: string;
+}
+
+export interface SMEDocument {
+    name: string;
+    status: 'Approved' | 'Pending' | 'Expired' | 'Missing' | 'Current';
+    date?: string;
+}
+
+export interface SMEChangeRequest {
+    id: string;
+    type: string;
+    date: string;
+    status: 'Approved' | 'Pending' | 'Rejected';
+    oldValue?: string;
+    newValue?: string;
+    requestor: string;
+}
+
+export interface SMECompany {
+    id: string;
+    name: string;
+    tin: string;
+    joined: string;
+    status: 'Active' | 'Pending' | 'Suspended';
+    risk: 'Low' | 'Medium' | 'High';
+    industry: string;
+    employees: number;
+    revenue: string;
+    address: string;
+    phone: string;
+    email: string;
+    website: string;
+    ceo: string;
+    legalStructure: string;
+    description: string;
+    shareholders: SMEShareholder[];
+    kyc: {
+        status: 'Verified' | 'Pending' | 'Failed';
+        lastCheck: string;
+        nextReview: string;
+        amlStatus: 'Clear' | 'Flagged';
+        riskScore: number;
+        documents: SMEDocument[];
+    };
+    changeHistory: SMEChangeRequest[];
+    directors?: { name: string; role: string; appointed: string }[];
+    beneficiaries?: { name: string; share: number; verified: boolean }[];
+    corporateDocuments?: SMEDocument[];
+}
