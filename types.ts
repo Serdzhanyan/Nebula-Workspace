@@ -149,6 +149,25 @@ export interface SMEChangeRequest {
     requestor: string;
 }
 
+export interface SMERepresentative {
+  name: string;
+  role: string;
+  authority: 'Full' | 'Limited' | 'View Only';
+  status: 'Active' | 'Inactive';
+  email: string;
+}
+
+export interface SMEPOA {
+  id: string;
+  grantor: string;
+  attorney: string;
+  type: 'General' | 'Limited' | 'Durable' | 'Springing';
+  status: 'Active' | 'Revoked' | 'Expired';
+  effectiveDate: string;
+  expirationDate: string;
+  scope: string;
+}
+
 export interface SMECompany {
     id: string;
     name: string;
@@ -179,4 +198,6 @@ export interface SMECompany {
     directors?: { name: string; role: string; appointed: string }[];
     beneficiaries?: { name: string; share: number; verified: boolean }[];
     corporateDocuments?: SMEDocument[];
+    representatives?: SMERepresentative[];
+    poaList?: SMEPOA[];
 }
