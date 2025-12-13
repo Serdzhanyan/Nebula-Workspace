@@ -143,6 +143,8 @@ export const SMEPage: React.FC<SMEPageProps> = ({ onBack }) => {
     setActiveSubTab(subId);
   };
 
+  const isFullscreenView = activeTab === 'products' && activeSubTab === 'plans';
+
   return (
     <div className="flex h-full bg-slate-50 dark:bg-slate-950 animate-in fade-in slide-in-from-right-4 duration-300">
       {/* Sidebar */}
@@ -214,7 +216,7 @@ export const SMEPage: React.FC<SMEPageProps> = ({ onBack }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative">
-        <div className="flex-1 overflow-y-auto p-8 relative z-10">
+        <div className={`flex-1 overflow-y-auto relative z-10 ${isFullscreenView ? 'p-0' : 'p-8'}`}>
             {activeTab === 'clients' && <SMEClientManagement activeSubTab={activeSubTab} />}
             {activeTab === 'cash' && <SMECashManagement activeSubTab={activeSubTab} />}
             {activeTab === 'payments' && <SMEPayments activeSubTab={activeSubTab} />}

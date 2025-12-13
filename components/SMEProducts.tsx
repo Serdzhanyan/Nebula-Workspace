@@ -41,18 +41,22 @@ export const SMEProducts: React.FC<Props> = ({ activeSubTab }) => {
       }
   };
 
+  const isFullscreen = activeSubTab === 'plans';
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-        <header className="mb-6">
-             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
-                 <span>Product Service</span>
-                 <ChevronRight size={14} />
-                 <span className="text-slate-900 dark:text-white font-medium capitalize">{activeSubTab.replace('_', ' ')}</span>
-             </div>
-             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{getLabel()}</h1>
-        </header>
+    <div className={isFullscreen ? "h-full w-full" : "space-y-6 max-w-7xl mx-auto"}>
+        {!isFullscreen && (
+            <header className="mb-6">
+                 <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
+                     <span>Product Service</span>
+                     <ChevronRight size={14} />
+                     <span className="text-slate-900 dark:text-white font-medium capitalize">{activeSubTab.replace('_', ' ')}</span>
+                 </div>
+                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{getLabel()}</h1>
+            </header>
+        )}
         
-        <div>
+        <div className={isFullscreen ? "h-full" : ""}>
             {activeSubTab === 'overview' && <SMEProductsOverview />}
             {activeSubTab === 'loans' && <SMEProductsLoans />}
             {activeSubTab === 'tariffs' && <SMEProductsTariffs />}
