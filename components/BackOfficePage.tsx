@@ -5,9 +5,10 @@ import { ArrowLeft, Package, ShoppingCart, FileText, Truck, Users, Settings, Plu
 interface BackOfficePageProps {
   onBack: () => void;
   onNavigateToSME?: () => void;
+  onNavigateToCorporate?: () => void;
 }
 
-export const BackOfficePage: React.FC<BackOfficePageProps> = ({ onBack, onNavigateToSME }) => {
+export const BackOfficePage: React.FC<BackOfficePageProps> = ({ onBack, onNavigateToSME, onNavigateToCorporate }) => {
   const stats = [
     { label: 'Pending Orders', value: '42', change: '+12%', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
     { label: 'Low Stock Items', value: '8', change: '-2', icon: Package, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
@@ -17,7 +18,7 @@ export const BackOfficePage: React.FC<BackOfficePageProps> = ({ onBack, onNaviga
 
   const businessServices = [
     { title: 'SME', subtitle: 'Small & Medium Business', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', onClick: onNavigateToSME },
-    { title: 'Corporate Clients', subtitle: 'Enterprise Solutions', icon: Building2, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+    { title: 'Corporate Clients', subtitle: 'Enterprise Solutions', icon: Building2, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', onClick: onNavigateToCorporate },
     { title: 'Financial Institutions', subtitle: 'Banking Partners', icon: Landmark, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     { title: 'Guarantees & Accreditations', subtitle: 'Security & Compliance', icon: ShieldCheck, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
     { title: 'Foreign Economic Activity', subtitle: 'FEA & Global Trade', icon: Globe, color: 'text-cyan-600', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
