@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, UserCircle, Briefcase, Activity, ShieldCheck, Landmark, Globe, FileText, ChevronRight, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { CorporateSection } from './CorporateSection';
+import { CorporateDashboard } from './CorporateDashboard';
+import { CorporateStructurePage } from './CorporateStructurePage';
 
 interface CorporateClientsPageProps {
   onBack: () => void;
@@ -26,13 +28,13 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
       icon: UserCircle,
       children: [
         { id: 'dashboard', label: 'Dashboard Overview' },
-        { id: 'structure', label: 'Corporate structure' },
-        { id: 'deep_kyc', label: 'Deep KYC' },
+        { id: 'structure', label: 'Corporate Structure (subsidiaries, joint ventures, holding companies)' },
+        { id: 'deep_kyc', label: 'Deep KYC (confirmation of beneficial ownership)' },
         { id: 'risk_assessments', label: 'End-to-end risk assessments' },
-        { id: 'financial_statements', label: 'Company financial statements' },
+        { id: 'company_financials', label: 'Company financial statements (balance sheet, profit and loss account, cash flow statement)' },
         { id: 'legal_dossier', label: 'Extended legal dossier' },
-        { id: 'ownership_structure', label: 'Ownership structure' },
-        { id: 'financial_statements_2', label: 'Financial statements' },
+        { id: 'ownership_chains', label: 'Ownership structure, beneficial ownership chains' },
+        { id: 'financial_statements_basic', label: 'Financial statements (balance sheet/profit and loss account)' },
         { id: 'credit_scoring', label: 'Company credit scoring' },
         { id: 'risk_dossier', label: 'Risk dossier' },
         { id: 'kyc_questionnaire', label: 'Enterprise KYC questionnaire' }
@@ -140,11 +142,8 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
   };
 
   const handleSubMenuClick = (childId: string) => {
-      if (childId === 'dashboard' && onNavigateToProfileDashboard) {
-          onNavigateToProfileDashboard();
-      } else {
-          setActiveTab(childId);
-      }
+      // Direct navigation to the specific subsection
+      setActiveTab(childId);
   };
 
   const getActiveLabel = () => {
@@ -226,12 +225,18 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
         </nav>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-400 text-center">
-            Corporate Module v1.9
+            Corporate Module v2.0
         </div>
       </div>
 
-      {/* Main Content Area - Renders generic section page */}
-      <CorporateSection title={getActiveLabel()} id={activeTab} />
+      {/* Main Content Area */}
+      {activeTab === 'dashboard' ? (
+        <CorporateDashboard />
+      ) : activeTab === 'structure' ? (
+        <CorporateStructurePage />
+      ) : (
+        <CorporateSection title={getActiveLabel()} id={activeTab} />
+      )}
       
     </div>
   );
