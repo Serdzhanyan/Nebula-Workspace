@@ -4,6 +4,35 @@ import { ArrowLeft, UserCircle, Briefcase, Activity, ShieldCheck, Landmark, Glob
 import { CorporateSection } from './CorporateSection';
 import { CorporateDashboard } from './CorporateDashboard';
 import { CorporateStructurePage } from './CorporateStructurePage';
+import { CorporateDeepKYCPage } from './CorporateDeepKYCPage';
+import { CorporateRiskAssessmentsPage } from './CorporateRiskAssessmentsPage';
+import { CorporateFinancialsPage } from './CorporateFinancialsPage';
+import { CorporateLegalDossierPage } from './CorporateLegalDossierPage';
+import { CorporateOwnershipPage } from './CorporateOwnershipPage';
+import { CorporateFinancialsBasicPage } from './CorporateFinancialsBasicPage';
+import { CorporateCreditScoringPage } from './CorporateCreditScoringPage';
+import { CorporateRiskDossierPage } from './CorporateRiskDossierPage';
+import { CorporateKYCQuestionnairePage } from './CorporateKYCQuestionnairePage';
+import { CorporateMultiAccountsPage } from './CorporateMultiAccountsPage';
+import { CorporateCurrencyAccountsPage } from './CorporateCurrencyAccountsPage';
+import { CorporatePOAPage } from './CorporatePOAPage';
+import { CorporateRegulatedLimitsPage } from './CorporateRegulatedLimitsPage';
+import { CorporateLimitsPage } from './CorporateLimitsPage';
+import { CorporateUserRolesPage } from './CorporateUserRolesPage';
+import { CorporateSpendingRequirementsPage } from './CorporateSpendingRequirementsPage';
+import { CorporateCurrencyControlPage } from './CorporateCurrencyControlPage';
+import { CorporateCardsPage } from './CorporateCardsPage';
+import { CorporateSpecialAccountsPage } from './CorporateSpecialAccountsPage';
+import { CorporateComplexPaymentsPage } from './CorporateComplexPaymentsPage';
+import { CorporateContractApprovalPage } from './CorporateContractApprovalPage';
+import { CorporateVerificationPage } from './CorporateVerificationPage';
+import { CorporateTransactionCompliancePage } from './CorporateTransactionCompliancePage';
+import { CorporateGuaranteesPage } from './CorporateGuaranteesPage';
+import { CorporateLargePaymentPage } from './CorporateLargePaymentPage';
+import { CorporateFATFAMLPage } from './CorporateFATFAMLPage';
+import { CorporateInterbankSettlementsPage } from './CorporateInterbankSettlementsPage';
+import { CorporateCurrencyTransactionsPage } from './CorporateCurrencyTransactionsPage';
+import { CorporateForeignCounterpartyPage } from './CorporateForeignCounterpartyPage';
 
 interface CorporateClientsPageProps {
   onBack: () => void;
@@ -19,7 +48,7 @@ interface MenuItem {
 
 export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBack, onNavigateToProfileDashboard }) => {
   const [activeTab, setActiveTab] = useState('structure');
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts', 'transactions', 'payments']);
 
   const menuItems: MenuItem[] = [
     { 
@@ -132,7 +161,6 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
   };
 
   const handleMenuClick = (item: MenuItem) => {
-    // If it has children, toggle menu, but also set active tab to the parent ID to show the overview page
     if (item.children && item.children.length > 0) {
         toggleMenu(item.id);
         setActiveTab(item.id); 
@@ -142,7 +170,6 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
   };
 
   const handleSubMenuClick = (childId: string) => {
-      // Direct navigation to the specific subsection
       setActiveTab(childId);
   };
 
@@ -175,7 +202,6 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
             {menuItems.map((item) => {
                 const hasChildren = item.children && item.children.length > 0;
                 const isExpanded = expandedMenus.includes(item.id);
-                // Parent is visually active if activeTab matches parent ID or any child ID
                 const isParentActive = activeTab === item.id || (hasChildren && item.children?.some(c => c.id === activeTab));
 
                 return (
@@ -230,13 +256,73 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
       </div>
 
       {/* Main Content Area */}
-      {activeTab === 'dashboard' ? (
-        <CorporateDashboard />
-      ) : activeTab === 'structure' ? (
-        <CorporateStructurePage />
-      ) : (
-        <CorporateSection title={getActiveLabel()} id={activeTab} />
-      )}
+      <div className="flex-1 overflow-hidden p-8">
+        {activeTab === 'dashboard' ? (
+          <CorporateDashboard />
+        ) : activeTab === 'structure' ? (
+          <CorporateStructurePage />
+        ) : activeTab === 'deep_kyc' ? (
+          <CorporateDeepKYCPage />
+        ) : activeTab === 'risk_assessments' ? (
+          <CorporateRiskAssessmentsPage />
+        ) : activeTab === 'company_financials' ? (
+          <CorporateFinancialsPage />
+        ) : activeTab === 'financial_statements_basic' ? (
+          <CorporateFinancialsBasicPage />
+        ) : activeTab === 'legal_dossier' ? (
+          <CorporateLegalDossierPage />
+        ) : activeTab === 'ownership_chains' ? (
+          <CorporateOwnershipPage />
+        ) : activeTab === 'credit_scoring' ? (
+          <CorporateCreditScoringPage />
+        ) : activeTab === 'risk_dossier' ? (
+          <CorporateRiskDossierPage />
+        ) : activeTab === 'kyc_questionnaire' ? (
+          <CorporateKYCQuestionnairePage />
+        ) : activeTab === 'multi_accounts' ? (
+          <CorporateMultiAccountsPage />
+        ) : activeTab === 'currency_accounts' ? (
+          <CorporateCurrencyAccountsPage />
+        ) : activeTab === 'poa_signatory' ? (
+          <CorporatePOAPage />
+        ) : activeTab === 'regulated_limits' ? (
+          <CorporateRegulatedLimitsPage />
+        ) : activeTab === 'corporate_limits' ? (
+          <CorporateLimitsPage />
+        ) : activeTab === 'user_roles' ? (
+          <CorporateUserRolesPage />
+        ) : activeTab === 'spending_requirements' ? (
+          <CorporateSpendingRequirementsPage />
+        ) : activeTab === 'currency_control' ? (
+          <CorporateCurrencyControlPage />
+        ) : activeTab === 'corporate_cards' ? (
+          <CorporateCardsPage />
+        ) : activeTab === 'special_accounts' ? (
+          <CorporateSpecialAccountsPage />
+        ) : activeTab === 'complex_payments' ? (
+          <CorporateComplexPaymentsPage />
+        ) : activeTab === 'contract_approval' ? (
+          <CorporateContractApprovalPage />
+        ) : activeTab === 'multi_stage_verification' ? (
+          <CorporateVerificationPage />
+        ) : activeTab === 'compliance_monitoring' ? (
+          <CorporateTransactionCompliancePage />
+        ) : activeTab === 'guarantees_collateral' ? (
+          <CorporateGuaranteesPage />
+        ) : activeTab === 'large_payment_control' ? (
+          <CorporateLargePaymentPage />
+        ) : activeTab === 'fatf_aml_verification' ? (
+          <CorporateFATFAMLPage />
+        ) : activeTab === 'interbank_settlements' ? (
+          <CorporateInterbankSettlementsPage />
+        ) : activeTab === 'currency_transactions' ? (
+          <CorporateCurrencyTransactionsPage />
+        ) : activeTab === 'foreign_counterparty' ? (
+          <CorporateForeignCounterpartyPage />
+        ) : (
+          <CorporateSection title={getActiveLabel()} id={activeTab} />
+        )}
+      </div>
       
     </div>
   );

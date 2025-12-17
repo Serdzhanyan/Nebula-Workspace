@@ -1,14 +1,13 @@
-import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.API_KEY || '';
+import { GoogleGenAI, Type } from "@google/genai";
 
-// Safely initialize the client only when needed to avoid early failures if key is missing during render
+// Use recommended initialization following guidelines
 const getClient = () => {
-  if (!apiKey) {
+  if (!process.env.API_KEY) {
     console.warn("API Key is missing. AI features will return mock data.");
     return null;
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 const parseJsonSafe = (text: string | undefined): any[] => {
@@ -74,11 +73,25 @@ export const generateCompanyNews = async (count: number = 3): Promise<{ title: s
   }
 
   try {
+    /* Using recommended model 'gemini-3-flash-preview' for basic text tasks */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Generate ${count} short, professional, positive, fictional company news headlines and a 1-sentence summary for each. Assign a category (Company, Industry, or Event) to each. Return strictly valid JSON array of objects with keys 'title', 'summary', and 'category'. Do not include markdown formatting.`,
+      model: "gemini-3-flash-preview",
+      contents: `Generate ${count} short, professional, positive, fictional company news headlines and a 1-sentence summary for each. Assign a category (Company, Industry, or Event) to each.`,
       config: {
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        /* Added responseSchema for more reliable structured output */
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              summary: { type: Type.STRING },
+              category: { type: Type.STRING }
+            },
+            required: ['title', 'summary', 'category']
+          }
+        }
       }
     });
     
@@ -105,8 +118,9 @@ export const generateNewsContent = async (title: string, summary: string): Promi
   if (!client) return mockContent;
 
   try {
+    /* Using recommended model 'gemini-3-flash-preview' */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: `Write a 3-paragraph professional internal company blog post based on this headline: "${title}" and summary: "${summary}". Use HTML paragraph tags <p> for the paragraphs. Do not use a main title <h1>.`
     });
     return response.text || mockContent;
@@ -124,8 +138,9 @@ export const analyzePerformance = async (metrics: any[]): Promise<string> => {
   if (!client) return defaultInsight;
 
   try {
+    /* Using recommended model 'gemini-3-flash-preview' */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: `Analyze these performance metrics and give a one-sentence encouraging summary: ${JSON.stringify(metrics)}`
     });
     return response.text || defaultInsight;
@@ -142,8 +157,9 @@ export const generateAboutUs = async (): Promise<string> => {
    if (!client) return defaultAbout;
    
    try {
+    /* Using recommended model 'gemini-3-flash-preview' */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: "Write a short, inspiring 2-sentence 'About Us' description for a futuristic tech company called Nebula Workspace."
     });
     return response.text || "Nebula Workspace: Innovating for tomorrow.";
@@ -166,11 +182,24 @@ export const generateTaskSuggestions = async (): Promise<{ title: string; priori
   }
 
   try {
+    /* Using recommended model 'gemini-3-flash-preview' */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Generate 3 specific, actionable work tasks for a tech professional (Productivity/Development/Management). Assign a priority (low, medium, high) to each. Return strictly valid JSON array of objects with keys 'title' and 'priority'. Do not include markdown formatting.`,
+      model: "gemini-3-flash-preview",
+      contents: `Generate 3 specific, actionable work tasks for a tech professional (Productivity/Development/Management). Assign a priority (low, medium, high) to each.`,
       config: {
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        /* Added responseSchema for more reliable structured output */
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              priority: { type: Type.STRING }
+            },
+            required: ['title', 'priority']
+          }
+        }
       }
     });
     return parseJsonSafe(response.text);
@@ -185,8 +214,9 @@ export const getChatResponse = async (message: string): Promise<string> => {
   if (!client) return "I am currently in offline mode. Please add your API key to enable chat.";
 
   try {
+    /* Using recommended model 'gemini-3-flash-preview' */
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: message,
       config: {
         systemInstruction: "You are 'Nebula AI', a helpful, professional, and concise workplace assistant integrated into a dashboard. Your goal is to help employees with productivity, summaries, and motivation. Keep answers short and relevant to a business context.",
