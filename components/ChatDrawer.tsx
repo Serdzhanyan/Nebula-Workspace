@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Search, ArrowLeft, Phone, Video, MoreVertical, Circle, Image, Paperclip, Mic, MicOff, VideoOff, PhoneOff, User, BellOff, Ban, Trash2, MonitorUp, MonitorOff, Camera } from 'lucide-react';
+/* Renamed Image to ImageIcon to prevent shadowing global constructor */
+import { X, Send, Search, ArrowLeft, Phone, Video, MoreVertical, Circle, Image as ImageIcon, Paperclip, Mic, MicOff, VideoOff, PhoneOff, User, BellOff, Ban, Trash2, MonitorUp, MonitorOff, Camera } from 'lucide-react';
 import { ChatMessage, ChatContact } from '../types';
 
 interface ChatDrawerProps {
@@ -375,7 +376,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose }) => {
                                 className="flex-1 bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 min-h-[20px]"
                             />
                             <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors">
-                                <Image size={18} />
+                                <ImageIcon size={18} />
                             </button>
                         </div>
 
@@ -462,7 +463,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose }) => {
                             onClick={endCall}
                             className="flex flex-col items-center gap-2 group text-white"
                         >
-                            <div className="p-3.5 rounded-full bg-red-500 group-hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all scale-105">
+                            <div className="p-3.5 rounded-full bg-red-50 group-hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all scale-105">
                                 <PhoneOff size={20} />
                             </div>
                             <span className="text-[10px] font-medium">End</span>

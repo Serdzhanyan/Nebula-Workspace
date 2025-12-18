@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { History, FileDiff, Search, Check } from 'lucide-react';
+import { History as HistoryIcon, FileDiff, Search, Check } from 'lucide-react';
 import { SMECompany } from '../types';
 
 interface Props {
@@ -103,7 +103,7 @@ export const SMEClientChanges: React.FC<Props> = ({ company: initialCompany }) =
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <History size={20} className="text-amber-500" /> Change History: {selectedCompany.name}
+                <HistoryIcon size={20} className="text-amber-500" /> Change History: {selectedCompany.name}
             </h3>
             {selectedCompany.changeHistory && selectedCompany.changeHistory.length > 0 ? (
                 <div className="space-y-4">

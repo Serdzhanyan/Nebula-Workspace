@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Download, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, FileText, Globe, DollarSign, Activity, RefreshCw, X, Eye, ShieldCheck, User, ArrowRight, Info, ExternalLink, ShieldMinus, SearchCode, History, Scale } from 'lucide-react';
+import { Search, Filter, Download, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, FileText, Globe, DollarSign, Activity, RefreshCw, X, Eye, ShieldCheck, User, ArrowRight, Info, ExternalLink, ShieldMinus, SearchCode, History as HistoryIcon, Scale } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 interface AMLHit {
@@ -143,14 +143,6 @@ export const CorporateFATFAMLPage: React.FC = () => {
     }
   };
 
-  // Pie Chart Data
-  const sourceStats = [
-    { name: 'Sanctions', value: selectedCompany.hits.filter(h => h.source === 'Sanctions').length, color: '#ef4444' },
-    { name: 'PEP', value: selectedCompany.hits.filter(h => h.source === 'PEP').length, color: '#3b82f6' },
-    { name: 'Media', value: selectedCompany.hits.filter(h => h.source === 'Adverse Media').length, color: '#f59e0b' },
-    { name: 'Other', value: selectedCompany.hits.filter(h => h.source === 'Watchlist').length, color: '#6366f1' },
-  ].filter(d => d.value > 0);
-
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 space-y-6">
       
@@ -244,7 +236,7 @@ export const CorporateFATFAMLPage: React.FC = () => {
                   <p className="text-xs text-slate-400 mt-1">Automated daily refresh active</p>
               </div>
               <div className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl">
-                  <History size={24} />
+                  <HistoryIcon size={24} />
               </div>
           </div>
       </div>
@@ -333,7 +325,7 @@ export const CorporateFATFAMLPage: React.FC = () => {
 
                       <div className="space-y-6 flex-1">
                           {/* Risk Level Gauge */}
-                          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                          <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-100 dark:border-slate-700 flex items-center justify-between">
                               <div>
                                   <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">AI Risk Sentiment</span>
                                   <div className={`text-2xl font-bold ${getRiskColor(selectedHit.riskLevel)}`}>{selectedHit.riskLevel} Severity</div>
@@ -359,7 +351,7 @@ export const CorporateFATFAMLPage: React.FC = () => {
                           <div className="grid grid-cols-2 gap-4">
                               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                                   <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Match Type</p>
-                                  <p className="font-bold text-slate-800 dark:text-white text-sm">{selectedHit.source}</p>
+                                  <p className="font-bold text-slate-900 dark:text-white text-sm">{selectedHit.source}</p>
                               </div>
                               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                                   <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Detected</p>

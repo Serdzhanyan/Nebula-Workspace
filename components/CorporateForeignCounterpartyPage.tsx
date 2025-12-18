@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-/* Added missing Clock import and fixed unused History import */
-import { Search, Filter, Download, Globe, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, FileText, Activity, RefreshCw, X, Eye, ShieldCheck, User, ArrowRight, Info, ExternalLink, Building2, Landmark, Scale, PieChart, MapPin, SearchCode, Clock } from 'lucide-react';
+import { Search, Filter, Download, Globe, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, FileText, Activity, RefreshCw, X, Eye, ShieldCheck, User, ArrowRight, Info, ExternalLink, Building2, Landmark, Scale, PieChart, MapPin, SearchCode, Clock, History as HistoryIcon } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 interface CounterpartyDoc {
@@ -368,7 +367,6 @@ export const CorporateForeignCounterpartyPage: React.FC = () => {
                               </div>
                               <div className="space-y-2">
                                   {selectedFC.documents.map(doc => (
-                                      /* Fix: Added missing key and corrected potentially missing Clock reference if it was used elsewhere */
                                       <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 transition-colors">
                                           <div className="flex items-center gap-2">
                                               <FileText size={14} className="text-slate-400" />

@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Bell, Check, Info, AlertCircle, CheckCircle2, X } from 'lucide-react';
-import { Notification } from '../types';
+import { AppNotification } from '../types';
 
 interface NotificationPanelProps {
-  notifications: Notification[];
+  notifications: AppNotification[];
   onMarkAllRead: () => void;
   onClose: () => void;
   onNotificationClick: (id: string) => void;

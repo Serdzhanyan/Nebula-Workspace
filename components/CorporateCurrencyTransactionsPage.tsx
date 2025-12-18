@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-/* Fixed: Added missing Clock, CheckCircle2, and XCircle imports */
-import { Search, Filter, Download, RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, DollarSign, Euro, PoundSterling, JapaneseYen, Plus, Globe, History, ChevronDown, Check, ArrowRight, X, Eye, ShieldCheck, Activity, Landmark, FileText, Zap, AlertCircle, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, DollarSign, Euro, PoundSterling, JapaneseYen, Plus, Globe, History as HistoryIcon, ChevronDown, Check, ArrowRight, X, Eye, ShieldCheck, Activity, Landmark, FileText, Zap, AlertCircle, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 interface CurrencyTrade {
@@ -109,6 +108,10 @@ export const CorporateCurrencyTransactionsPage: React.FC = () => {
     { time: '13:00', rate: 1.084 },
     { time: '14:00', rate: 1.087 },
   ];
+
+  const formatCurrency = (val: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(val);
+  };
 
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 space-y-6">
@@ -225,7 +228,7 @@ export const CorporateCurrencyTransactionsPage: React.FC = () => {
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                 filterType === t 
                                 ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm' 
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                           >
                               {t}

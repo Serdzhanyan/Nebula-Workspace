@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Search, Filter, Download, CreditCard, TrendingUp, AlertTriangle, ShieldCheck, Activity, ChevronDown, Check, ArrowUpRight, ArrowDownRight, History, FileText, Info } from 'lucide-react';
+import { Search, Filter, Download, CreditCard, TrendingUp, AlertTriangle, ShieldCheck, Activity, ChevronDown, Check, ArrowUpRight, ArrowDownRight, History as HistoryIcon, FileText, Info } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell, RadialBarChart, RadialBar, Legend, PolarAngleAxis } from 'recharts';
 
 interface CreditScoreHistory {

@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { ArrowLeft, Bell, Check, Info, AlertCircle, CheckCircle2, Trash2, Filter } from 'lucide-react';
-import { Notification } from '../types';
+import { AppNotification } from '../types';
 
 interface NotificationsPageProps {
-  notifications: Notification[];
+  notifications: AppNotification[];
   onMarkAllRead: () => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;

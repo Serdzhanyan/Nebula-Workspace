@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Bell, Search, Settings, Moon, Sun, MessageCircle } from 'lucide-react';
 import { generateAboutUs } from './services/geminiService';
-import { NewsItem, Task, TrainingModule, Notification } from './types';
+import { NewsItem, Task, TrainingModule, AppNotification } from './types';
 
 // Widgets
 import { NewsWidget } from './components/NewsWidget';
@@ -80,7 +80,7 @@ function App() {
 
   // Notification State
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
+  const [notifications, setNotifications] = useState<AppNotification[]>([
     { id: '1', title: 'New Task Assigned', message: 'Sarah assigned "Q4 Roadmap Review" to you.', time: '5m ago', read: false, type: 'info' },
     { id: '2', title: 'Meeting Reminder', message: 'All-Hands meeting starts in 15 minutes.', time: '15m ago', read: false, type: 'alert' },
     { id: '3', title: 'Course Completed', message: 'Congratulations! You completed "Security Basics".', time: '2h ago', read: true, type: 'success' },

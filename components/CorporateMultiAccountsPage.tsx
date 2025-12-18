@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-/* Added missing Clock import */
-import { Search, Filter, Download, Wallet, Globe, ArrowRightLeft, TrendingUp, MoreHorizontal, Plus, DollarSign, Euro, PoundSterling, JapaneseYen, Check, AlertCircle, RefreshCw, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
+import { Search, Filter, Download, Wallet, Globe, ArrowRightLeft, TrendingUp, MoreHorizontal, Plus, DollarSign, Euro, PoundSterling, JapaneseYen, Check, AlertCircle, RefreshCw, ArrowUpRight, ArrowDownLeft, Clock, ChevronDown, ArrowRight } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 interface CurrencyAccount {
@@ -32,6 +31,16 @@ interface CompanyAccounts {
   accounts: CurrencyAccount[];
   transactions: Transaction[];
 }
+
+const rateHistoryData = [
+  { time: '09:00', rate: 1.081 },
+  { time: '10:00', rate: 1.083 },
+  { time: '11:00', rate: 1.082 },
+  { time: '12:00', rate: 1.085 },
+  { time: '13:00', rate: 1.084 },
+  { time: '14:00', rate: 1.087 },
+  { time: '15:00', rate: 1.089 },
+];
 
 export const CorporateMultiAccountsPage: React.FC = () => {
   // Mock Data
@@ -117,6 +126,13 @@ export const CorporateMultiAccountsPage: React.FC = () => {
       'USD': 1, 'EUR': 0.92, 'GBP': 0.77, 'JPY': 150.5, 'CAD': 1.35
   };
 
+  const getExchangeRate = (from: string, to: string) => {
+    if (from === to) return 1;
+    const fromRate = rates[from] || 1;
+    const toRate = rates[to] || 1;
+    return toRate / fromRate;
+  };
+
   const calculateExchange = () => {
       if (!exchangeAmount) return 0;
       const amountInBase = parseFloat(exchangeAmount) / rates[exchangeFrom];
@@ -125,7 +141,7 @@ export const CorporateMultiAccountsPage: React.FC = () => {
 
   const chartData = selectedCompany.accounts.map(acc => ({
       name: acc.currency,
-      value: acc.balance / rates[acc.currency], // Convert to USD for pie chart proportionality
+      value: acc.balance / rates[acc.currency],
       displayValue: acc.balance,
       originalCurrency: acc.currency
   }));
@@ -135,6 +151,8 @@ export const CorporateMultiAccountsPage: React.FC = () => {
   const totalLiquidityUSD = selectedCompany.accounts.reduce((acc, curr) => {
       return acc + (curr.balance / rates[curr.currency]);
   }, 0);
+
+  const currentRate = getExchangeRate(exchangeFrom, exchangeTo).toFixed(4);
 
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 space-y-6">
@@ -162,7 +180,7 @@ export const CorporateMultiAccountsPage: React.FC = () => {
                         setShowDropdown(true);
                     }}
                     onFocus={() => setShowDropdown(true)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white transition-all"
                 />
                 
                 {showDropdown && (
@@ -197,13 +215,8 @@ export const CorporateMultiAccountsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-          
-          {/* Left: Overview & Holdings */}
           <div className="lg:col-span-2 space-y-6">
-              
-              {/* Liquidity Dashboard */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
                   <div className="flex justify-between items-start mb-6">
                       <div>
@@ -223,7 +236,6 @@ export const CorporateMultiAccountsPage: React.FC = () => {
                   </div>
 
                   <div className="flex flex-col md:flex-row gap-8">
-                      {/* Chart */}
                       <div className="h-64 w-full md:w-1/2 relative">
                           <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
@@ -262,7 +274,6 @@ export const CorporateMultiAccountsPage: React.FC = () => {
                           </div>
                       </div>
 
-                      {/* Legend / List */}
                       <div className="flex-1 space-y-3 overflow-y-auto max-h-64">
                           {selectedCompany.accounts.map((acc, idx) => (
                               <div key={acc.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
@@ -283,7 +294,6 @@ export const CorporateMultiAccountsPage: React.FC = () => {
                   </div>
               </div>
 
-              {/* Accounts List */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedCompany.accounts.map(acc => (
                       <div key={acc.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
@@ -314,7 +324,7 @@ export const CorporateMultiAccountsPage: React.FC = () => {
                                   Transfer
                               </button>
                               <button className="py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                  Details
+                                  History
                               </button>
                           </div>
                       </div>
@@ -322,111 +332,138 @@ export const CorporateMultiAccountsPage: React.FC = () => {
               </div>
           </div>
 
-          {/* Right Column: Tools & History */}
           <div className="space-y-6">
-              
-              {/* FX Calculator */}
-              <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-lg border border-slate-700">
                   <div className="flex items-center gap-2 mb-6">
-                      <RefreshCw size={20} className="text-indigo-200" />
-                      <h3 className="font-bold text-lg">Quick Exchange</h3>
+                      <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                        <ArrowRightLeft size={20} />
+                      </div>
+                      <h3 className="font-bold text-lg">Quick Convert</h3>
                   </div>
 
                   <div className="space-y-4">
                       <div>
-                          <div className="flex justify-between text-xs text-indigo-200 mb-1">
+                          <div className="flex justify-between text-xs text-slate-400 mb-1">
                               <span>Sell</span>
-                              <span>Bal: {selectedCompany.accounts.find(a => a.currency === exchangeFrom)?.balance.toLocaleString() || 0}</span>
+                              <span>Bal: {selectedCompany.accounts.find(a => a.currency === exchangeFrom)?.balance.toLocaleString()}</span>
                           </div>
-                          <div className="flex bg-white/10 rounded-xl p-1 border border-white/20">
+                          <div className="flex bg-black/20 rounded-xl p-1 border border-white/10 focus-within:border-white/30 transition-all">
                               <input 
                                   type="number" 
                                   placeholder="0.00"
                                   value={exchangeAmount}
                                   onChange={(e) => setExchangeAmount(e.target.value)}
-                                  className="w-full bg-transparent border-none text-white placeholder-indigo-300 px-3 outline-none font-mono font-bold"
+                                  className="w-full bg-transparent border-none text-white placeholder-slate-500 px-3 py-2 outline-none font-mono font-bold text-lg"
                               />
-                              <select 
-                                  value={exchangeFrom}
-                                  onChange={(e) => setExchangeFrom(e.target.value)}
-                                  className="bg-black/20 text-white border-none rounded-lg text-sm font-bold px-2 outline-none cursor-pointer"
-                              >
-                                  {Object.keys(rates).map(c => <option key={c} value={c} className="text-black">{c}</option>)}
-                              </select>
+                              <div className="relative">
+                                  <select 
+                                      value={exchangeFrom}
+                                      onChange={(e) => setExchangeFrom(e.target.value)}
+                                      className="h-full bg-white/10 text-white border-none rounded-lg text-sm font-bold pl-3 pr-8 outline-none cursor-pointer hover:bg-white/20 transition-colors appearance-none"
+                                  >
+                                      {selectedCompany.accounts.map(acc => <option key={acc.currency} value={acc.currency} className="text-black">{acc.currency}</option>)}
+                                  </select>
+                                  <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              </div>
                           </div>
                       </div>
 
                       <div className="flex justify-center -my-2 relative z-10">
                           <button 
                             onClick={() => {
-                                const temp = convertFrom;
-                                setConvertFrom(convertTo);
-                                setConvertTo(temp);
+                                const temp = exchangeFrom;
+                                setExchangeFrom(exchangeTo);
+                                setExchangeTo(temp);
                             }}
-                            className="p-2 bg-indigo-600 text-white rounded-full shadow-md hover:scale-110 transition-transform"
+                            className="p-2 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-colors border-4 border-slate-900"
                           >
                               <ArrowRightLeft size={16} className="rotate-90" />
                           </button>
                       </div>
 
                       <div>
-                          <div className="flex justify-between text-xs text-indigo-200 mb-1">
-                              <span>To</span>
-                              <span>Rate: 1 {exchangeFrom} = {(rates[exchangeTo] / rates[exchangeFrom]).toFixed(4)} {exchangeTo}</span>
+                          <div className="flex justify-between text-xs text-slate-400 mb-1">
+                              <span>Buy</span>
+                              <span>Rate: {currentRate}</span>
                           </div>
-                          <div className="flex bg-white/10 rounded-xl p-1 border border-white/20">
-                              <div className="w-full px-3 py-2 text-white font-mono font-bold">
-                                  {exchangeAmount ? calculateExchange().toFixed(2) : '0.00'}
+                          <div className="flex bg-black/20 rounded-xl p-1 border border-white/10">
+                              <div className="w-full px-3 py-3 text-white font-mono font-bold text-lg">
+                                  {exchangeAmount ? (parseFloat(exchangeAmount) * getExchangeRate(exchangeFrom, exchangeTo)).toFixed(2) : '0.00'}
                               </div>
-                              <select 
-                                  value={exchangeTo}
-                                  onChange={(e) => setExchangeTo(e.target.value)}
-                                  className="bg-black/20 text-white border-none rounded-lg text-sm font-bold px-2 outline-none cursor-pointer"
-                              >
-                                  {Object.keys(rates).map(c => <option key={c} value={c} className="text-black">{c}</option>)}
-                              </select>
+                              <div className="relative">
+                                  <select 
+                                      value={exchangeTo}
+                                      onChange={(e) => setExchangeTo(e.target.value)}
+                                      className="h-full bg-white/10 text-white border-none rounded-lg text-sm font-bold pl-3 pr-8 outline-none cursor-pointer hover:bg-white/20 transition-colors appearance-none"
+                                  >
+                                      {['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'MXN', 'CHF'].map(c => <option key={c} value={c} className="text-black">{c}</option>)}
+                                  </select>
+                                  <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              </div>
                           </div>
                       </div>
 
-                      <button className="w-full py-3 bg-white text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors shadow-md mt-2">
-                          Review Exchange
+                      <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-all shadow-lg mt-2 flex items-center justify-center gap-2">
+                          Review Trade <ArrowRight size={16} />
                       </button>
                   </div>
               </div>
 
-              {/* Recent Activity Feed */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex-1 flex flex-col">
-                  <h3 className="font-bold text-slate-900 dark:text-white mb-4">Recent Transactions</h3>
-                  <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                      {selectedCompany.transactions.length > 0 ? (
-                          selectedCompany.transactions.map((tx) => (
-                              <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
-                                  <div className="flex items-center gap-3">
-                                      <div className={`p-2 rounded-lg ${tx.type === 'credit' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'}`}>
-                                          {tx.type === 'credit' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
-                                      </div>
-                                      <div>
-                                          <p className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{tx.description}</p>
-                                          <p className="text-xs text-slate-500">{tx.date} • {tx.status}</p>
-                                      </div>
-                                  </div>
-                                  <span className={`text-sm font-bold ${tx.type === 'credit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
-                                      {tx.type === 'credit' ? '+' : '-'}{tx.amount.toLocaleString(undefined, { style: 'currency', currency: tx.currency })}
-                                  </span>
-                              </div>
-                          ))
-                      ) : (
-                          <div className="flex flex-col items-center justify-center h-40 text-slate-400">
-                              <Wallet size={32} className="mb-2 opacity-20" />
-                              <p className="text-sm font-medium">No recent transactions</p>
-                          </div>
-                      )}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm h-64 flex flex-col">
+                  <div className="flex justify-between items-center mb-4">
+                      <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white text-sm">EUR / USD</h4>
+                          <p className="text-xs text-emerald-500 font-bold flex items-center gap-1">
+                              1.089 <TrendingUp size={12} /> +0.45%
+                          </p>
+                      </div>
+                      <div className="flex gap-1">
+                          {['1H', '1D', '1W'].map(t => (
+                              <button key={t} className={`px-2 py-1 text-[10px] font-bold rounded ${t === '1D' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>{t}</button>
+                          ))}
+                      </div>
                   </div>
-                  <button className="w-full mt-4 py-2 text-xs font-bold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 border-t border-slate-100 dark:border-slate-800 pt-3 transition-colors">
-                      View All Activity
-                  </button>
+                  <div className="flex-1 w-full min-h-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={rateHistoryData}>
+                              <defs>
+                                  <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                  </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                              <XAxis dataKey="time" hide />
+                              <YAxis domain={['auto', 'auto']} hide />
+                              <Tooltip 
+                                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px' }}
+                                  itemStyle={{ color: '#1e293b' }}
+                              />
+                              <Area type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRate)" />
+                          </AreaChart>
+                      </ResponsiveContainer>
+                  </div>
               </div>
 
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-4">Market Insights</h4>
+                  <div className="space-y-4">
+                      <div className="flex gap-3 items-start">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></div>
+                          <div>
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">ECB signals potential rate cut in Q4, impacting EUR strength.</p>
+                              <span className="text-[10px] text-slate-400 block mt-1">2 hours ago • Reuters</span>
+                          </div>
+                      </div>
+                      <div className="flex gap-3 items-start">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
+                          <div>
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">USD/JPY hits new monthly high amidst bond yield shifts.</p>
+                              <span className="text-[10px] text-slate-400 block mt-1">4 hours ago • Bloomberg</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
           </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Download, ShieldAlert, FileText, History, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Check, ArrowRight, User, Globe, Building2, Eye, Calendar, AlertOctagon, MoreHorizontal, RefreshCw } from 'lucide-react';
+/* Renamed History to HistoryIcon to prevent shadowing global API */
+import { Search, Filter, Download, ShieldAlert, FileText, History as HistoryIcon, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Check, ArrowRight, User, Globe, Building2, Eye, Calendar, AlertOctagon, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 interface RiskEvent {
@@ -134,10 +135,10 @@ export const CorporateRiskDossierPage: React.FC = () => {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'Low': return 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800';
-      case 'Medium': return 'text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
-      case 'High': return 'text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800';
-      case 'Critical': return 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+      case 'Low': return 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800';
+      case 'Medium': return 'text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800';
+      case 'High': return 'text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800';
+      case 'Critical': return 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
       default: return 'text-slate-600 bg-slate-50';
     }
   };
@@ -182,7 +183,7 @@ export const CorporateRiskDossierPage: React.FC = () => {
                         setShowDropdown(true);
                     }}
                     onFocus={() => setShowDropdown(true)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white transition-all"
                 />
                 
                 {showDropdown && (
@@ -240,7 +241,7 @@ export const CorporateRiskDossierPage: React.FC = () => {
                       {selectedDossier.riskLevel} Risk
                   </div>
 
-                  <div className="w-full grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+                  <div className="w-full grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-700 pt-6">
                       <div>
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Risk Score</p>
                           <p className={`text-2xl font-bold ${
@@ -285,7 +286,7 @@ export const CorporateRiskDossierPage: React.FC = () => {
                    </button>
                    <button 
                       onClick={() => setActiveTab('timeline')}
-                      className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'timeline' ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                      className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'timeline' ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                    >
                        Event History
                    </button>
@@ -325,14 +326,14 @@ export const CorporateRiskDossierPage: React.FC = () => {
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                              <button className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors text-left group shadow-sm">
+                              <button className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors text-left group shadow-sm transition-all">
                                   <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg w-fit mb-3 group-hover:scale-110 transition-transform">
                                       <RefreshCw size={20} />
                                   </div>
                                   <h5 className="font-bold text-slate-900 dark:text-white">Refresh Data</h5>
                                   <p className="text-xs text-slate-500 mt-1">Run new screening check</p>
                               </button>
-                              <button className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-red-300 dark:hover:border-red-700 transition-colors text-left group shadow-sm">
+                              <button className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-red-300 dark:hover:border-red-700 transition-colors text-left group shadow-sm transition-all">
                                   <div className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg w-fit mb-3 group-hover:scale-110 transition-transform">
                                       <AlertOctagon size={20} />
                                   </div>

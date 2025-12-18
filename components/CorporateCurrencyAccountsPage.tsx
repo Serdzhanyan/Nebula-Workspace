@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Search, Filter, Download, RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, DollarSign, Euro, PoundSterling, JapaneseYen, Plus, Globe, History, ChevronDown, Check, ArrowRight } from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, ArrowRightLeft, TrendingUp, TrendingDown, DollarSign, Euro, PoundSterling, JapaneseYen, Plus, Globe, History as HistoryIcon, ChevronDown, Check, ArrowRight } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 interface CurrencyHolding {
@@ -163,7 +162,7 @@ export const CorporateCurrencyAccountsPage: React.FC = () => {
                         setShowDropdown(true);
                     }}
                     onFocus={() => setShowDropdown(true)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white transition-all"
                 />
                 
                 {showDropdown && (
@@ -238,7 +237,7 @@ export const CorporateCurrencyAccountsPage: React.FC = () => {
                           </div>
 
                           <div className="flex gap-2">
-                              <button className="flex-1 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">
+                              <button className="flex-1 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold hover:bg-indigo-900/40 transition-colors">
                                   Transfer
                               </button>
                               <button className="flex-1 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
@@ -253,7 +252,7 @@ export const CorporateCurrencyAccountsPage: React.FC = () => {
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col flex-1">
                   <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                       <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          <History size={18} className="text-slate-400" /> FX History
+                          <HistoryIcon size={18} className="text-slate-400" /> FX History
                       </h3>
                       <button className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">View All</button>
                   </div>

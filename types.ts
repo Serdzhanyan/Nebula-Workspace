@@ -98,7 +98,7 @@ export interface TrainingModule {
   language?: string;
 }
 
-export interface Notification {
+export interface AppNotification {
   id: string;
   title: string;
   message: string;

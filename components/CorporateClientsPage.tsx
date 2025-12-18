@@ -33,6 +33,8 @@ import { CorporateFATFAMLPage } from './CorporateFATFAMLPage';
 import { CorporateInterbankSettlementsPage } from './CorporateInterbankSettlementsPage';
 import { CorporateCurrencyTransactionsPage } from './CorporateCurrencyTransactionsPage';
 import { CorporateForeignCounterpartyPage } from './CorporateForeignCounterpartyPage';
+import { CorporateCreditLineManagementPage } from './CorporateCreditLineManagementPage';
+import { CorporateCovenantControlPage } from './CorporateCovenantControlPage';
 
 interface CorporateClientsPageProps {
   onBack: () => void;
@@ -48,7 +50,7 @@ interface MenuItem {
 
 export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBack, onNavigateToProfileDashboard }) => {
   const [activeTab, setActiveTab] = useState('structure');
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts', 'transactions', 'payments']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts', 'transactions', 'payments', 'lending']);
 
   const menuItems: MenuItem[] = [
     { 
@@ -319,6 +321,10 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
           <CorporateCurrencyTransactionsPage />
         ) : activeTab === 'foreign_counterparty' ? (
           <CorporateForeignCounterpartyPage />
+        ) : activeTab === 'credit_line_management' ? (
+          <CorporateCreditLineManagementPage />
+        ) : activeTab === 'covenant_control' ? (
+          <CorporateCovenantControlPage />
         ) : (
           <CorporateSection title={getActiveLabel()} id={activeTab} />
         )}
