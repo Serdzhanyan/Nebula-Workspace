@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ArrowLeft, UserCircle, Briefcase, Activity, ShieldCheck, Landmark, Globe, FileText, ChevronRight, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { CorporateSection } from './CorporateSection';
@@ -27,7 +26,7 @@ import { CorporateComplexPaymentsPage } from './CorporateComplexPaymentsPage';
 import { CorporateContractApprovalPage } from './CorporateContractApprovalPage';
 import { CorporateVerificationPage } from './CorporateVerificationPage';
 import { CorporateTransactionCompliancePage } from './CorporateTransactionCompliancePage';
-import { CorporateGuaranteesPage } from './CorporateGuaranteesPage';
+import { CorporateCollateralSecurityPage } from './CorporateCollateralSecurityPage';
 import { CorporateLargePaymentPage } from './CorporateLargePaymentPage';
 import { CorporateFATFAMLPage } from './CorporateFATFAMLPage';
 import { CorporateInterbankSettlementsPage } from './CorporateInterbankSettlementsPage';
@@ -35,6 +34,9 @@ import { CorporateCurrencyTransactionsPage } from './CorporateCurrencyTransactio
 import { CorporateForeignCounterpartyPage } from './CorporateForeignCounterpartyPage';
 import { CorporateCreditLineManagementPage } from './CorporateCreditLineManagementPage';
 import { CorporateCovenantControlPage } from './CorporateCovenantControlPage';
+import { CorporateOverdraftsPage } from './CorporateOverdraftsPage';
+import { CorporateSyndicatedLoansPage } from './CorporateSyndicatedLoansPage';
+import { CorporatePortfolioRiskPage } from './CorporatePortfolioRiskPage';
 
 interface CorporateClientsPageProps {
   onBack: () => void;
@@ -97,7 +99,7 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
         { id: 'contract_approval', label: 'Contract approval' },
         { id: 'multi_stage_verification', label: 'Multi-stage verification' },
         { id: 'compliance_monitoring', label: 'Transaction compliance' },
-        { id: 'guarantees_collateral', label: 'Guarantees and collateral' }
+        { id: 'collateral_security', label: 'Collateral and Security' }
       ]
     },
     { 
@@ -119,7 +121,6 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
       children: [
         { id: 'credit_line_management', label: 'Credit Line Management' },
         { id: 'covenant_control', label: 'Covenant Control' },
-        { id: 'collateral_security', label: 'Collateral and Security' },
         { id: 'overdrafts', label: 'Overdrafts' },
         { id: 'syndicated_loans', label: 'Syndicated Loans' },
         { id: 'portfolio_risk', label: 'Portfolio Risk' }
@@ -238,7 +239,7 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
                                     className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 ${
                                         activeTab === child.id 
                                         ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold' 
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                     }`}
                                 >
                                     {child.id === 'dashboard' && <LayoutDashboard size={12} />}
@@ -309,8 +310,8 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
           <CorporateVerificationPage />
         ) : activeTab === 'compliance_monitoring' ? (
           <CorporateTransactionCompliancePage />
-        ) : activeTab === 'guarantees_collateral' ? (
-          <CorporateGuaranteesPage />
+        ) : activeTab === 'collateral_security' ? (
+          <CorporateCollateralSecurityPage />
         ) : activeTab === 'large_payment_control' ? (
           <CorporateLargePaymentPage />
         ) : activeTab === 'fatf_aml_verification' ? (
@@ -325,6 +326,12 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
           <CorporateCreditLineManagementPage />
         ) : activeTab === 'covenant_control' ? (
           <CorporateCovenantControlPage />
+        ) : activeTab === 'overdrafts' ? (
+          <CorporateOverdraftsPage />
+        ) : activeTab === 'syndicated_loans' ? (
+          <CorporateSyndicatedLoansPage />
+        ) : activeTab === 'portfolio_risk' ? (
+          <CorporatePortfolioRiskPage />
         ) : (
           <CorporateSection title={getActiveLabel()} id={activeTab} />
         )}
