@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, UserCircle, Briefcase, Activity, ShieldCheck, Landmark, Globe, FileText, ChevronRight, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { CorporateSection } from './CorporateSection';
@@ -37,6 +38,17 @@ import { CorporateCovenantControlPage } from './CorporateCovenantControlPage';
 import { CorporateOverdraftsPage } from './CorporateOverdraftsPage';
 import { CorporateSyndicatedLoansPage } from './CorporateSyndicatedLoansPage';
 import { CorporatePortfolioRiskPage } from './CorporatePortfolioRiskPage';
+import { CorporatePayrollProjectsPage } from './CorporatePayrollProjectsPage';
+import { CorporateCollectionPage } from './CorporateCollectionPage';
+import { CorporateAcquiringPage } from './CorporateAcquiringPage';
+import { CorporateLettersOfCreditPage } from './CorporateLettersOfCreditPage';
+import { CorporateLiquidityPage } from './CorporateLiquidityPage';
+import { CorporateServiceTermsChangesPage } from './CorporateServiceTermsChangesPage';
+import { CorporateNewServiceRequestsPage } from './CorporateNewServiceRequestsPage';
+import { CorporateEmployeeAccessPage } from './CorporateEmployeeAccessPage';
+import { CorporateSignatoryConfigPage } from './CorporateSignatoryConfigPage';
+import { CorporateReportsPage } from './CorporateReportsPage';
+import { CorporateOperationAnalyticsPage } from './CorporateOperationAnalyticsPage';
 
 interface CorporateClientsPageProps {
   onBack: () => void;
@@ -52,7 +64,7 @@ interface MenuItem {
 
 export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBack, onNavigateToProfileDashboard }) => {
   const [activeTab, setActiveTab] = useState('structure');
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts', 'transactions', 'payments', 'lending']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['profile', 'accounts', 'transactions', 'payments', 'lending', 'services', 'risk']);
 
   const menuItems: MenuItem[] = [
     { 
@@ -332,6 +344,28 @@ export const CorporateClientsPage: React.FC<CorporateClientsPageProps> = ({ onBa
           <CorporateSyndicatedLoansPage />
         ) : activeTab === 'portfolio_risk' ? (
           <CorporatePortfolioRiskPage />
+        ) : activeTab === 'payroll_projects' ? (
+          <CorporatePayrollProjectsPage />
+        ) : activeTab === 'collection' ? (
+          <CorporateCollectionPage />
+        ) : activeTab === 'acquiring' ? (
+          <CorporateAcquiringPage />
+        ) : activeTab === 'letters_of_credit' ? (
+          <CorporateLettersOfCreditPage />
+        ) : activeTab === 'liquidity_management' ? (
+          <CorporateLiquidityPage />
+        ) : activeTab === 'service_terms_changes' ? (
+          <CorporateServiceTermsChangesPage />
+        ) : activeTab === 'new_service_requests' ? (
+          <CorporateNewServiceRequestsPage />
+        ) : activeTab === 'employee_access' ? (
+          <CorporateEmployeeAccessPage />
+        ) : activeTab === 'signatory_config' ? (
+          <CorporateSignatoryConfigPage />
+        ) : activeTab === 'corporate_reports' ? (
+          <CorporateReportsPage />
+        ) : activeTab === 'operation_analytics' ? (
+          <CorporateOperationAnalyticsPage />
         ) : (
           <CorporateSection title={getActiveLabel()} id={activeTab} />
         )}

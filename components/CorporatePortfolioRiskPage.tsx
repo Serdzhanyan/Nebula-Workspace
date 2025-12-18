@@ -201,8 +201,8 @@ export const CorporatePortfolioRiskPage: React.FC = () => {
                 )}
             </div>
             
-            <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
-                <Download size={18} /> Export PDF
+            <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+                <Download size={18} />
             </button>
         </div>
       </div>
@@ -214,14 +214,14 @@ export const CorporatePortfolioRiskPage: React.FC = () => {
               <div className="relative w-24 h-24 flex items-center justify-center z-10">
                   <svg className="w-full h-full transform -rotate-90">
                       <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100 dark:text-slate-800" />
-                      <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={251} strokeDashoffset={251 - (251 * selectedCompany.overallRiskScore / 100)} stroke={getRiskColor(selectedCompany.overallRiskScore)} strokeLinecap="round" className="transition-all duration-1000" />
+                      {/* Fixed: Removed duplicate stroke attribute */}
+                      <circle cx="48" cy="48" r="40" strokeWidth="8" fill="transparent" strokeDasharray={251} strokeDashoffset={251 - (251 * selectedCompany.overallRiskScore / 100)} stroke={getRiskColor(selectedCompany.overallRiskScore)} strokeLinecap="round" className="transition-all duration-1000" />
                   </svg>
                   <span className="absolute text-2xl font-bold text-slate-900 dark:text-white">{selectedCompany.overallRiskScore}%</span>
               </div>
           </div>
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-center">
               <div className="flex items-center gap-2 mb-1">
-                  {/* Added missing DollarSign usage */}
                   <DollarSign size={16} className="text-indigo-500" />
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Exposure</p>
               </div>
@@ -279,7 +279,7 @@ export const CorporatePortfolioRiskPage: React.FC = () => {
                   </div>
 
                   {/* Sector Concentration Pie */}
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm h-full flex flex-col">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm h-full flex flex-col">
                       <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                           <PieChartIcon size={20} className="text-purple-500" /> Sector Exposure
                       </h3>
@@ -368,7 +368,6 @@ export const CorporatePortfolioRiskPage: React.FC = () => {
               
               {/* Asset Detail Overlay (If selected) */}
               {selectedAsset ? (
-                  /* Fixed: Removed duplicate className attribute */
                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-in slide-in-from-right duration-300">
                       <div className="flex justify-between items-start mb-6">
                           <div>
@@ -475,7 +474,6 @@ export const CorporatePortfolioRiskPage: React.FC = () => {
       
       {/* Hidden Fallback UI for Empty Portfolio */}
       {selectedCompany.assets.length === 0 && (
-          /* Fixed: Removed duplicate className attribute */
           <div className="bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-8 flex flex-col items-center justify-center text-center h-full text-slate-400">
               <DollarSign size={48} className="mb-4 opacity-20" />
               <p className="font-medium">No assets found for this category.</p>
